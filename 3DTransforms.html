@@ -15,9 +15,18 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 <link rel="stylesheet" href="bootstrap.min.css">
 
 <style>
-    input[type=number] { text-align:center }
     th { text-align:center }
     
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+        text-align:center;
+    }
+
     .form-control.float {
         display: inline-flex;
         margin-right: 0em;
@@ -194,7 +203,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         </div>
         
         <div class="row bg-1-2">
-            <div class="col col-xs-12 col-sm-auto">
+            <div class="col">
             <p class="m-2"> 
                 We are considering the rotation that goes from a coordinate 
                 system \(B\) to a coordinate system \(A\), noted \(AfromB\).
@@ -206,7 +215,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         </div>
         
         <div class="row">
-            <div class="col col-xs-12 col-sm-auto bg-4-1">
+            <div class="col bg-4-1">
                 <p><h4 class="text-center">Euler Angles</h4></p>
                 <p class="text-center">
                 <a href="#" 
@@ -226,7 +235,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
                         around X, then around the new Y, then around the new Z.
                     </p>
                 </div>
-                <table mx-auto>
+                <table class="mx-auto">
                     <tr><td>X = </td><td><input type="number" class="form-control float" id="euler-x" value=""/></td></tr>
                     <tr><td>Y = </td><td><input type="number" class="form-control float" id="euler-y" value=""/></td></tr>
                     <tr><td>Z = </td><td><input type="number" class="form-control float" id="euler-z" value=""/></td></tr>
@@ -234,7 +243,31 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
                 <br>             
             </div>
 
-            <div class="col col-xs-12 col-sm-auto bg-4-2">
+            <div class="col bg-4-2">
+                <p><h4 class="text-center">Angle Axis</h4></p>
+                <p class="text-center">
+                <a href="#" 
+                    id="angle-axis-popover" 
+                    data-toggle="popover" 
+                    data-trigger="click"
+                    data-placement="right"><span class="help-tip">?</span>
+                </a>
+                </p>
+                <div id="angle-axis-popover-content" class="hide">
+                    <p>
+                        Angle Axis FIXME
+                    </p>
+                </div>
+                <table class="mx-auto">
+                    <tr><td>X = </td><td><input type="number" class="form-control float" id="angle-axis-x" value=""/></td></tr>
+                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="angle-axis-y" value=""/></td></tr>
+                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="angle-axis-z" value=""/></td></tr>
+                    <tr><td>&Theta; = </td><td><input type="number" class="form-control float" id="angle-axis-theta" value=""/></td></tr>
+                </table>
+                <br>             
+            </div>
+
+            <div class="col bg-3-1">
                 <p><h4 class="text-center">Quaternion</h4></p>
                 <p class="text-center">
                 <a href="#" 
@@ -250,16 +283,16 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
                         <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">See the wikipedia page.</a>
                     </p>
                 </div>
-                <table mx-auto>
+                <table class="mx-auto">
                     <tr><td>X = </td><td><input type="number" class="form-control float" id="quaternion-x" value=""/></td></tr>
                     <tr><td>Y = </td><td><input type="number" class="form-control float" id="quaternion-y" value=""/></td></tr>
                     <tr><td>Z = </td><td><input type="number" class="form-control float" id="quaternion-z" value=""/></td></tr>
-                    <tr><td>W = </td><td><input type="number" class="form-control float" id="quaternion-z" value=""/></td></tr>
+                    <tr><td>W = </td><td><input type="number" class="form-control float" id="quaternion-w" value=""/></td></tr>
                 </table>
                 <br>    
             </div>
 
-            <div class="col col-xs-12 col-sm-auto bg-2-1">
+            <div class="col bg-2-1">
                 <p><h4 class="text-center">Rotation matrix 3x3</h4></p>
                 <p class="text-center">
                 <a href="#"
