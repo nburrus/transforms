@@ -6,55 +6,62 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" 
-        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" 
-        crossorigin="anonymous">
+integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" 
+crossorigin="anonymous">
+</script>
+<script type="text/javascript" async
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 <link rel="stylesheet" href="bootstrap.min.css">
 
 <style>
     input[type=number] { text-align:center }
     th { text-align:center }
-
+    
     .form-control.float {
         display: inline-flex;
         margin-right: 0em;
         width: 6.5em;
     }
-
+    
     .page-header {
         margin-top: 1em;
         margin-bottom: 1em;
     }
-
+    
     .table.vector3Width {
         max-width: 30em;
         min-width: 30em;
     }
-
+    
     .table.packed {
         width: auto;
     }
-
+    
     .table.packed td {
         padding: 0px;
         border: none;
     }
-
+    
     .verticallyCenter {
         display: flex;
         align-items: center;
         min-height: 10em;
         padding: 1em 0;
     }
-
+    
     .row.equalColumnHeight {
         display: flex;
         flex-wrap: wrap;
     }
-
+    
     .row  { background-color: #e2e9e9; }
     .row.bg-1-2 { background-color: #7e9a9a; }
-
+    
+    .hide {
+        display: none;
+    }
+    
     .col.bg-1-1 { background-color: #e2e9e9; }
     .col.bg-1-2 { background-color: #7e9a9a; }
     .col.bg-2-1 { background-color: #ffebcc; }
@@ -65,24 +72,44 @@
     .col.bg-3-2 { background-color: #2a6592; }
     .col.bg-4-1 { background-color: #cce9ff; }
     .col.bg-4-2 { background-color: #8ec3eb; }
+
+    .help-tip {
+        display: inline-block;
+        text-align: center;
+        background-color: #aaaaaa;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        line-height: 32px;
+        font-weight: bold;
+        color:#fff;
+        /*cursor: default;*/
+    }
+
+    .help-tip:hover {
+        background: #fff;
+        color:#aaaaaa;
+    }
+
 </style>
 
 <script type="application/javascript">
     var state = {};
     state.aFromB = new THREE.Matrix4(); // the transform
-
+    
     let matrixIndex = (r,c) => { return c*4+r; }
     let prettyFloat = (f) => { return Math.round(f*1e5) / 1e5; }
     let rad2deg = (v) => { return v*180.0/Math.PI; }
     let deg2rad = (v) => { return v*Math.PI/180.0; }
-
+    
     let updateRotationMatrixView = function () {
-
+        
         let elmToStr = (row,col) => {
             let v = state.aFromB.elements[matrixIndex(row,col)];
             return prettyFloat(v);
         };
-
+        
         // Elements are stored in col-major mode, 4x4 matrix.        
         for (let row = 0; row < 3; ++row)
         for (let col = 0; col < 3; ++col)
@@ -92,21 +119,21 @@
             $(htmlId).val(htmlValue);
         }
     };
-
+    
     let updateEulerView = function () {
-
+        
         let eulerAngles = new THREE.Euler();
         eulerAngles.setFromRotationMatrix(state.aFromB, 'ZYX');
         $('#euler-x').val(prettyFloat(rad2deg(eulerAngles.x)));
         $('#euler-y').val(prettyFloat(rad2deg(eulerAngles.y)));
         $('#euler-z').val(prettyFloat(rad2deg(eulerAngles.z)));
     };
-
+    
     let updateViewFrom = function (from) {
         if (from != 'rotationMatrix') updateRotationMatrixView();
         if (from != 'eulerAngles') updateEulerView();
     };
-
+    
     let onRotationMatrixChange = function () {        
         for (let row = 0; row < 3; ++row)
         {
@@ -116,118 +143,134 @@
                 state.aFromB.elements[matrixIndex(row,col)] = parseFloat($(htmlId).val());
             }
         }
-
+        
         updateViewFrom ('rotationMatrix');
     };
-
+    
     let onEulerChange = function () {
         let floatRadiansOrZero = id => { let v = document.getElementById(id).value; return v ? parseFloat(v)*Math.PI/180.0 : 0.0; };
         let euler = new THREE.Euler(floatRadiansOrZero("euler-x"), floatRadiansOrZero("euler-y"), floatRadiansOrZero("euler-z"), 'ZYX');
         state.aFromB.makeRotationFromEuler(euler);
         updateViewFrom ('eulerAngles');
     };
-
+    
     let onInit = function () {
         for (let id of ['euler-x', 'euler-y', 'euler-z']) {
             $(`#${id}`).on('input', onEulerChange);
         }
-
+        
         for (let row = 0; row < 3; ++row)
         for (let col = 0; col < 3; ++col)
         {
             $(`#m${row}${col}`).on('input', onRotationMatrixChange);
         }
-
+        
         updateViewFrom ('init');
-    };
-
+        
+        $('#euler-popover').popover({
+            html : true,
+            content: function() { return $("#euler-popover-content").html(); }
+        });
+    }
+    
     $( document ).ready(onInit);
 </script>
 
 <body>
     
-<div class="container-fluid">
-    <div class="row">
-        <div class="col bg-1-1">
-            <div class="page-header">
-                <h1>3D Transformation</h1>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col bg-1-1">
+                <div class="page-header">
+                    <h1>3D Transformation</h1>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="row bg-1-2">
-        <p class="m-2"> 
-            We are considering the operation that goes from a coordinate 
-            system <i>B</i> to a coordinate system <i>A</i>, noted <b><i>aFromB</i></b>.
-        </p>
+        
+        <div class="row bg-1-2">
+            <p class="m-2"> 
+                We are considering the operation that goes from a coordinate 
+                system <i>B</i> to a coordinate system <i>A</i>, noted <b><i>aFromB</i></b>. More text.
+            </p>
+        </div>
+        
+        <div class="row">
+            <div class="col col-auto bg-4-1">
+                <p><h4>Euler Angles</h4></p>
+                <p style="text-align: center;">
+                <a href="#" 
+                    id="euler-popover" 
+                    data-toggle="popover" 
+                    data-trigger="click"
+                    data-placement="right"><span class="help-tip">?</span>
+                </a>
+                </p>
+                <div id="euler-popover-content" class="hide">
+                    <p>
+                        Euler Angles are defined in Z-Y-X, 
+                        <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>
+                        , Intrinsics.<br>
+                        \[aFromB = R(Z) * R(Y) * R(X)\]
+                        This means that a point gets transformed by first applying the rotation
+                        around X, then around the new Y, then around the new Z.
+                    </p>
+                </div>
+                <p>X = <input type="number" class="form-control float" id="euler-x" value=""/></p>
+                <p>Y = <input type="number" class="form-control float" id="euler-y" value=""/></p>
+                <p>Z = <input type="number" class="form-control float" id="euler-z" value=""/></p>              
+            </div>
+        </div>
+        
+        <!-- <div class="row equalColumnHeight bg-info">
+            <div class="col-xs-12 col-sm-8">
+                <h3>Quaternion</h3>
+                <table class="table vector4Width center-block">
+                    <thead><tr><th>X</th><th>Y</th><th>Z</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="number" class="form-control" id="euler-x" value=""/></td>
+                            <td><input type="number" class="form-control" id="euler-y" value=""/></td>
+                            <td><input type="number" class="form-control" id="euler-z" value=""/></td>
+                            <td><input type="number" class="form-control" id="quaternion-w" value=""/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xs-12 col-sm-4 bg-primary">
+                
+            </div>
+        </div> -->
+        
+        <div class="row">
+            <div class="col col-auto bg-2-1">
+                <p><h4>Rotation matrix 3x3</h4></p>
+                <table class="table table-sm borderless packed">
+                    <tbody id="rotation-matrix-table">
+                        <tr>
+                            <td><input type="number" class="form-control float" id="m00" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m01" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m02" value=""/></td>
+                        </tr>
+                        <tr>
+                            <td><input type="number" class="form-control float" id="m10" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m11" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m12" value=""/></td>
+                        </tr>
+                        <tr>
+                            <td><input type="number" class="form-control float" id="m20" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m21" value=""/></td>
+                            <td><input type="number" class="form-control float" id="m22" value=""/></td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="col bg-2-2">
+                <p class="m-2">
+                    Row vectors correspond to XXX.
+                </p>
+            </div>
+        </div> 
     </div>
     
-    <div class="row">
-        <div class="col col-auto bg-4-1">
-            <p><h4>Euler Angles</h4></p>
-            <p>X = <input type="number" class="form-control float" id="euler-x" value=""/></p>
-            <p>Y = <input type="number" class="form-control float" id="euler-y" value=""/></p>
-            <p>Z = <input type="number" class="form-control float" id="euler-z" value=""/></p>  
-        </div>
-        <div class="col bg-4-2">
-            <p class="m-2">
-                Euler Angles are defined in Z-Y-X, Tait-Bryan, Intrinsics.
-                <br>
-                aFromB_rotation = Z * Y * X
-            </p>
-        </div>
-    </div>
-
-     <!-- <div class="row equalColumnHeight bg-info">
-        <div class="col-xs-12 col-sm-8">
-            <h3>Quaternion</h3>
-            <table class="table vector4Width center-block">
-            <thead><tr><th>X</th><th>Y</th><th>Z</th></tr></thead>
-            <tbody>
-                <tr>
-                <td><input type="number" class="form-control" id="euler-x" value=""/></td>
-                <td><input type="number" class="form-control" id="euler-y" value=""/></td>
-                <td><input type="number" class="form-control" id="euler-z" value=""/></td>
-                <td><input type="number" class="form-control" id="quaternion-w" value=""/></td>
-                </tr>
-            </tbody>
-            </table>
-        </div>
-        <div class="col-xs-12 col-sm-4 bg-primary">
-           
-        </div>
-    </div> -->
-
-    <div class="row">
-        <div class="col col-auto bg-2-1">
-            <p><h4>Rotation matrix 3x3</h4></p>
-             <table class="table table-sm borderless packed">
-            <tbody id="rotation-matrix-table">
-            <tr>
-                <td><input type="number" class="form-control float" id="m00" value=""/></td>
-                <td><input type="number" class="form-control float" id="m01" value=""/></td>
-                <td><input type="number" class="form-control float" id="m02" value=""/></td>
-            </tr>
-            <tr>
-                <td><input type="number" class="form-control float" id="m10" value=""/></td>
-                <td><input type="number" class="form-control float" id="m11" value=""/></td>
-                <td><input type="number" class="form-control float" id="m12" value=""/></td>
-            </tr>
-            <tr>
-                <td><input type="number" class="form-control float" id="m20" value=""/></td>
-                <td><input type="number" class="form-control float" id="m21" value=""/></td>
-                <td><input type="number" class="form-control float" id="m22" value=""/></td>
-            </tr>
-            </tbody>
-            </table> 
-        </div>
-        <div class="col bg-2-2">
-            <p class="m-2">
-                Row vectors correspond to XXX.
-            </p>
-        </div>
-    </div> 
-</div>
-
 </body>
 </html>
