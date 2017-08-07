@@ -167,9 +167,15 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         
         updateViewFrom ('init');
         
-        $('#euler-popover').popover({
-            html : true,
-            content: function() { return $("#euler-popover-content").html(); }
+        // Enable popover on all the elements whose id ends with "-popover"
+        // Automatically set their content to a hidden div with the
+        // corresponding suffix "-popover-content".
+        $("a[id*=-popover]").each(function() {
+            let itemId = $(this).attr('id');
+            $(this).popover({
+                html : true,
+                content: function() { return $(`#${itemId}-content`).html(); }
+            });
         });
     }
     
@@ -178,26 +184,31 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
 
 <body>
     
-    <div class="container-fluid">
+    <div class="container">
         <div class="row">
             <div class="col bg-1-1">
                 <div class="page-header">
-                    <h1>3D Transformation</h1>
+                    <h1>3D Rotation Conversion</h1>
                 </div>
             </div>
         </div>
         
         <div class="row bg-1-2">
+            <div class="col col-xs-12 col-sm-auto">
             <p class="m-2"> 
-                We are considering the operation that goes from a coordinate 
-                system <i>B</i> to a coordinate system <i>A</i>, noted <b><i>aFromB</i></b>. More text.
+                We are considering the rotation that goes from a coordinate 
+                system \(B\) to a coordinate system \(A\), noted \(AfromB\).
+                This notation allows to combine transforms without ambiguity,
+                e.g \(AfromC = AfromB * BfromC\), and applies naturally to
+                a point on the right: \(pointInA = AfromB * pointInB\)
             </p>
+            </div>
         </div>
         
         <div class="row">
-            <div class="col col-auto bg-4-1">
-                <p><h4>Euler Angles</h4></p>
-                <p style="text-align: center;">
+            <div class="col col-xs-12 col-sm-auto bg-4-1">
+                <p><h4 class="text-center">Euler Angles</h4></p>
+                <p class="text-center">
                 <a href="#" 
                     id="euler-popover" 
                     data-toggle="popover" 
@@ -210,41 +221,60 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
                         Euler Angles are defined in Z-Y-X, 
                         <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>
                         , Intrinsics.<br>
-                        \[aFromB = R(Z) * R(Y) * R(X)\]
+                        \[AfromB = R(Z) * R(Y) * R(X)\]
                         This means that a point gets transformed by first applying the rotation
                         around X, then around the new Y, then around the new Z.
                     </p>
                 </div>
-                <p>X = <input type="number" class="form-control float" id="euler-x" value=""/></p>
-                <p>Y = <input type="number" class="form-control float" id="euler-y" value=""/></p>
-                <p>Z = <input type="number" class="form-control float" id="euler-z" value=""/></p>              
-            </div>
-        </div>
-        
-        <!-- <div class="row equalColumnHeight bg-info">
-            <div class="col-xs-12 col-sm-8">
-                <h3>Quaternion</h3>
-                <table class="table vector4Width center-block">
-                    <thead><tr><th>X</th><th>Y</th><th>Z</th></tr></thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="number" class="form-control" id="euler-x" value=""/></td>
-                            <td><input type="number" class="form-control" id="euler-y" value=""/></td>
-                            <td><input type="number" class="form-control" id="euler-z" value=""/></td>
-                            <td><input type="number" class="form-control" id="quaternion-w" value=""/></td>
-                        </tr>
-                    </tbody>
+                <table mx-auto>
+                    <tr><td>X = </td><td><input type="number" class="form-control float" id="euler-x" value=""/></td></tr>
+                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="euler-y" value=""/></td></tr>
+                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="euler-z" value=""/></td></tr>
                 </table>
+                <br>             
             </div>
-            <div class="col-xs-12 col-sm-4 bg-primary">
-                
+
+            <div class="col col-xs-12 col-sm-auto bg-4-2">
+                <p><h4 class="text-center">Quaternion</h4></p>
+                <p class="text-center">
+                <a href="#" 
+                    id="quaternion-popover" 
+                    data-toggle="popover" 
+                    data-trigger="click"
+                    data-placement="bottom"><span class="help-tip">?</span>
+                </a>
+                </p>
+                <div id="quaternion-popover-content" class="hide">
+                    <p>
+                        Rotations can be uniquely represented (up to the sign) as a unit quaternion.
+                        <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">See the wikipedia page.</a>
+                    </p>
+                </div>
+                <table mx-auto>
+                    <tr><td>X = </td><td><input type="number" class="form-control float" id="quaternion-x" value=""/></td></tr>
+                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="quaternion-y" value=""/></td></tr>
+                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="quaternion-z" value=""/></td></tr>
+                    <tr><td>W = </td><td><input type="number" class="form-control float" id="quaternion-z" value=""/></td></tr>
+                </table>
+                <br>    
             </div>
-        </div> -->
-        
-        <div class="row">
-            <div class="col col-auto bg-2-1">
-                <p><h4>Rotation matrix 3x3</h4></p>
-                <table class="table table-sm borderless packed">
+
+            <div class="col col-xs-12 col-sm-auto bg-2-1">
+                <p><h4 class="text-center">Rotation matrix 3x3</h4></p>
+                <p class="text-center">
+                <a href="#"
+                    id="rotation-matrix-popover" 
+                    data-toggle="popover" 
+                    data-trigger="click"
+                    data-placement="bottom"><span class="help-tip">?</span>
+                </a>
+                </p>
+                <div id="rotation-matrix-popover-content" class="hide">
+                    <p>
+                        Rotation matrices are 3x3. The row vectors are xxx.
+                    </p>
+                </div>
+                <table class="table table-sm borderless packed mx-auto">
                     <tbody id="rotation-matrix-table">
                         <tr>
                             <td><input type="number" class="form-control float" id="m00" value=""/></td>
@@ -264,12 +294,8 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
                     </tbody>
                 </table> 
             </div>
-            <div class="col bg-2-2">
-                <p class="m-2">
-                    Row vectors correspond to XXX.
-                </p>
-            </div>
-        </div> 
+        </div>
+
     </div>
     
 </body>
