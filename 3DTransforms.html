@@ -4,19 +4,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" 
-integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" 
-crossorigin="anonymous">
-</script>
-<script type="text/javascript" async
-src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-<link rel="stylesheet" href="bootstrap.min.css">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" 
+integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" 
+crossorigin="anonymous"></script> 
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<!-- Generated through https://www.bootstrap-live-customizer.com/ . First selecting the Cosmo theme. -->
+<link rel="stylesheet" href="bootstrap.min.css">  
 
 <style>
-    th { text-align:center }
-    
+    /* Remove the spinner buttons on number input fields */
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
@@ -26,8 +24,9 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         -moz-appearance: textfield;
         text-align:center;
     }
-
-    .form-control.float {
+    
+    /* Fixed size for our pretty float */
+    .form-control.prettyFloat {
         display: inline-flex;
         margin-right: 0em;
         width: 6.5em;
@@ -38,18 +37,19 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         margin-bottom: 1em;
     }
     
-    .table.vector3Width {
-        max-width: 30em;
-        min-width: 30em;
-    }
-    
     .table.packed {
         width: auto;
+        margin: 1em auto;
     }
     
     .table.packed td {
-        padding: 0px;
+        vertical-align: middle;
+        padding: 0;
         border: none;
+    }
+    
+    .table.packed td.pr-2 {
+        padding-right: 0.2em;
     }
     
     .verticallyCenter {
@@ -60,12 +60,28 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
     }
     
     .row.equalColumnHeight {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex;
-        flex-wrap: wrap;
-    }
-    
+    }    
     .row  { background-color: #e2e9e9; }
     .row.bg-1-2 { background-color: #7e9a9a; }
+    
+    @media only screen and (min-width : 481px) {
+        .flex-row.row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .flex-row.row > [class*='col-'] {
+            display: flex;
+            flex-direction: column;
+        }
+        .flex-row.row:after, 
+        .flex-row.row:before {
+            display: flex;
+        }
+    }
     
     .hide {
         display: none;
@@ -81,7 +97,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
     .col.bg-3-2 { background-color: #2a6592; }
     .col.bg-4-1 { background-color: #cce9ff; }
     .col.bg-4-2 { background-color: #8ec3eb; }
-
+    
     .help-tip {
         display: inline-block;
         text-align: center;
@@ -95,12 +111,12 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         color:#fff;
         /*cursor: default;*/
     }
-
+    
     .help-tip:hover {
         background: #fff;
         color:#aaaaaa;
     }
-
+    
 </style>
 
 <script type="application/javascript">
@@ -197,139 +213,143 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-
         <div class="row">
             <div class="col bg-1-1">
                 <div class="page-header">
-                    <h1>3D Rotation Conversion</h1>
+                    <h1 class="text-center">3D Rotation Conversion</h1>
                 </div>
             </div>
         </div>
         
-        <div class="row bg-1-2">
-            <div class="col">
-            <p class="m-2"> 
-                We are considering the rotation that goes from a coordinate 
-                system \(B\) to a coordinate system \(A\), noted \(AfromB\).
-                This notation allows to combine transforms without ambiguity,
-                e.g \(AfromC = AfromB * BfromC\), and applies naturally to
-                a point on the right: \(pointInA = AfromB * pointInB\)
-            </p>
+        <div class="flex-row row bg-1-2">
+            <div class="col-xs-24">
+                <p> 
+                    We are considering the rotation that goes from a coordinate 
+                    system \(B\) to a coordinate system \(A\), noted \(AfromB\).
+                    This notation allows to combine transforms without ambiguity,
+                    e.g \(AfromC = AfromB * BfromC\), and applies naturally to
+                    a point on the right: \(pointInA = AfromB * pointInB\)
+                </p>
             </div>
         </div>
         
-        <div class="row">
-            <div class="col bg-4-1">
+        <div class="flex-row row">
+            <div class="col col-xs-24 col-sm-8 col-md-5 bg-4-1">
                 <p><h4 class="text-center">Euler Angles</h4></p>
                 <p class="text-center">
-                <a href="#" 
+                    <a
+                    title="Euler Angles"
                     id="euler-popover" 
                     data-toggle="popover" 
                     data-trigger="click"
-                    data-placement="right"><span class="help-tip">?</span>
+                    data-placement="auto"><span class="help-tip">?</span>
                 </a>
+            </p>
+            <div id="euler-popover-content" class="hide">
+                <p>
+                    They are defined in Z-Y-X, 
+                    <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>
+                    , Intrinsics.<br>
+                    \[AfromB = R(Z) * R(Y) * R(X)\]
+                    This means that a point gets transformed by first applying the rotation
+                    around X, then around the new Y, then around the new Z.
                 </p>
-                <div id="euler-popover-content" class="hide">
-                    <p>
-                        Euler Angles are defined in Z-Y-X, 
-                        <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>
-                        , Intrinsics.<br>
-                        \[AfromB = R(Z) * R(Y) * R(X)\]
-                        This means that a point gets transformed by first applying the rotation
-                        around X, then around the new Y, then around the new Z.
-                    </p>
-                </div>
-                <table class="mx-auto">
-                    <tr><td>X = </td><td><input type="number" class="form-control float" id="euler-x" value=""/></td></tr>
-                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="euler-y" value=""/></td></tr>
-                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="euler-z" value=""/></td></tr>
-                </table>
-                <br>             
             </div>
-
-            <div class="col bg-4-2">
-                <p><h4 class="text-center">Angle Axis</h4></p>
-                <p class="text-center">
-                <a href="#" 
-                    id="angle-axis-popover" 
-                    data-toggle="popover" 
-                    data-trigger="click"
-                    data-placement="right"><span class="help-tip">?</span>
-                </a>
-                </p>
-                <div id="angle-axis-popover-content" class="hide">
-                    <p>
-                        Angle Axis FIXME
-                    </p>
-                </div>
-                <table class="mx-auto">
-                    <tr><td>X = </td><td><input type="number" class="form-control float" id="angle-axis-x" value=""/></td></tr>
-                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="angle-axis-y" value=""/></td></tr>
-                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="angle-axis-z" value=""/></td></tr>
-                    <tr><td>&Theta; = </td><td><input type="number" class="form-control float" id="angle-axis-theta" value=""/></td></tr>
-                </table>
-                <br>             
-            </div>
-
-            <div class="col bg-3-1">
-                <p><h4 class="text-center">Quaternion</h4></p>
-                <p class="text-center">
-                <a href="#" 
-                    id="quaternion-popover" 
-                    data-toggle="popover" 
-                    data-trigger="click"
-                    data-placement="bottom"><span class="help-tip">?</span>
-                </a>
-                </p>
-                <div id="quaternion-popover-content" class="hide">
-                    <p>
-                        Rotations can be uniquely represented (up to the sign) as a unit quaternion.
-                        <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">See the wikipedia page.</a>
-                    </p>
-                </div>
-                <table class="mx-auto">
-                    <tr><td>X = </td><td><input type="number" class="form-control float" id="quaternion-x" value=""/></td></tr>
-                    <tr><td>Y = </td><td><input type="number" class="form-control float" id="quaternion-y" value=""/></td></tr>
-                    <tr><td>Z = </td><td><input type="number" class="form-control float" id="quaternion-z" value=""/></td></tr>
-                    <tr><td>W = </td><td><input type="number" class="form-control float" id="quaternion-w" value=""/></td></tr>
-                </table>
-                <br>    
-            </div>
-
-            <div class="col bg-2-1">
-                <p><h4 class="text-center">Rotation matrix 3x3</h4></p>
-                <p class="text-center">
-                <a href="#"
-                    id="rotation-matrix-popover" 
-                    data-toggle="popover" 
-                    data-trigger="click"
-                    data-placement="bottom"><span class="help-tip">?</span>
-                </a>
-                </p>
-                <div id="rotation-matrix-popover-content" class="hide">
-                    <p>
-                        Rotation matrices are 3x3. The row vectors are xxx.
-                    </p>
-                </div>
-                <table class="table table-sm borderless packed mx-auto">
-                    <tbody id="rotation-matrix-table">
-                        <tr>
-                            <td><input type="number" class="form-control float" id="m00" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m01" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m02" value=""/></td>
-                        </tr>
-                        <tr>
-                            <td><input type="number" class="form-control float" id="m10" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m11" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m12" value=""/></td>
-                        </tr>
-                        <tr>
-                            <td><input type="number" class="form-control float" id="m20" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m21" value=""/></td>
-                            <td><input type="number" class="form-control float" id="m22" value=""/></td>
-                        </tr>
-                    </tbody>
-                </table> 
-            </div>
+            <table class="table packed">
+                <tr><td class="pr-2">X = </td><td><input type="number" class="form-control prettyFloat" id="euler-x" value=""/></td></tr>
+                <tr><td class="pr-2">Y = </td><td><input type="number" class="form-control prettyFloat" id="euler-y" value=""/></td></tr>
+                <tr><td class="pr-2">Z = </td><td><input type="number" class="form-control prettyFloat" id="euler-z" value=""/></td></tr>
+            </table>
+            <br>             
         </div>
-
+        
+        <div class="col col-xs-24 col-sm-8 col-md-5 bg-4-2 text-center">
+            <p><h4 class="text-center">Angle Axis</h4></p>
+            <p class="text-center">
+                <a
+                title="Angle Axis"
+                id="angle-axis-popover" 
+                data-toggle="popover" 
+                data-trigger="click"
+                data-placement="auto"><span class="help-tip">?</span>
+            </a>
+        </p>
+        <div id="angle-axis-popover-content" class="hide">
+            <p>
+                The rotation is uniquely defined (up to the sign) by a unit axis [X,Y,Z] and an angle &Theta; around it.
+            </p>
+        </div>
+        <table class="table packed">
+            <tr><td class="pr-2">X = </td><td><input type="number" class="form-control prettyFloat" id="angle-axis-x" value=""/></td></tr>
+            <tr><td class="pr-2">Y = </td><td><input type="number" class="form-control prettyFloat" id="angle-axis-y" value=""/></td></tr>
+            <tr><td class="pr-2">Z = </td><td><input type="number" class="form-control prettyFloat" id="angle-axis-z" value=""/></td></tr>
+            <tr><td>&Theta; = </td><td><input type="number" class="form-control prettyFloat" id="angle-axis-theta" value=""/></td></tr>
+        </table>
+        <br>             
     </div>
     
+    <div class="col col-xs-24 col-sm-8 col-md-5 bg-3-1">
+        <p><h4 class="text-center">Quaternion</h4></p>
+        <p class="text-center">
+            <a
+            title="Quaternion"
+            id="quaternion-popover" 
+            data-toggle="popover" 
+            data-trigger="click"
+            data-placement="auto"><span class="help-tip">?</span>
+        </a>
+    </p>
+    <div id="quaternion-popover-content" class="hide">
+        <p>
+            A unit quaternion is a unique (up to the sign) representation. Quaternions allow easy interpolation and composition.
+            <a href="https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation">See the wikipedia page.</a>
+        </p>
+    </div>
+    <table class="table packed">
+        <tr><td class="pr-2">X = </td><td><input type="number" class="form-control prettyFloat" id="quaternion-x" value=""/></td></tr>
+        <tr><td class="pr-2">Y = </td><td><input type="number" class="form-control prettyFloat" id="quaternion-y" value=""/></td></tr>
+        <tr><td class="pr-2">Z = </td><td><input type="number" class="form-control prettyFloat" id="quaternion-z" value=""/></td></tr>
+        <tr><td class="pr-2">W = </td><td><input type="number" class="form-control prettyFloat" id="quaternion-w" value=""/></td></tr>
+    </table>
+    <br>    
+</div>
+
+<div class="col col-xs-24 col-sm-24 col-md-9 bg-2-1">
+    <p><h4 class="text-center">Rotation matrix 3x3</h4></p>
+    <p class="text-center">
+        <a
+        id="rotation-matrix-popover" 
+        title="Rotation matrix"
+        data-toggle="popover" 
+        data-trigger="click"
+        data-placement="auto"><span class="help-tip">?</span>
+    </a>
+</p>
+<div id="rotation-matrix-popover-content" class="hide">
+    <p>
+        Rotation matrices are 3x3. The row vectors are xxx.
+    </p>
+</div>
+<table class="table packed">
+    <tbody id="rotation-matrix-table">
+        <tr>
+            <td><input type="number" class="form-control prettyFloat" id="m00" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m01" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m02" value=""/></td>
+        </tr>
+        <tr>
+            <td><input type="number" class="form-control prettyFloat" id="m10" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m11" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m12" value=""/></td>
+        </tr>
+        <tr>
+            <td><input type="number" class="form-control prettyFloat" id="m20" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m21" value=""/></td>
+            <td><input type="number" class="form-control prettyFloat" id="m22" value=""/></td>
+        </tr>
+    </tbody>
+</table> 
+</div>
+</div>
+
+</div>
+
 </body>
 </html>
