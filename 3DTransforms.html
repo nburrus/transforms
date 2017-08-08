@@ -52,22 +52,10 @@ crossorigin="anonymous"></script>
         padding-right: 0.2em;
     }
     
-    .verticallyCenter {
-        display: flex;
-        align-items: center;
-        min-height: 10em;
-        padding: 1em 0;
-    }
-    
-    .row.equalColumnHeight {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-    }    
     .row  { background-color: #e2e9e9; }
     .row.bg-1-2 { background-color: #7e9a9a; }
     
+    /* This is here to make all the columns have the same height. */
     @media only screen and (min-width : 481px) {
         .flex-row.row {
             display: flex;
@@ -83,9 +71,7 @@ crossorigin="anonymous"></script>
         }
     }
     
-    .hide {
-        display: none;
-    }
+    .hide { display: none; }
     
     .col.bg-1-1 { background-color: #e2e9e9; }
     .col.bg-1-2 { background-color: #7e9a9a; }
@@ -109,7 +95,7 @@ crossorigin="anonymous"></script>
         line-height: 32px;
         font-weight: bold;
         color:#fff;
-        /*cursor: default;*/
+        cursor: default;
     }
     
     .help-tip:hover {
