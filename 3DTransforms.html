@@ -284,10 +284,15 @@
   };
 
   let onRotationMatrixChange = function() {
+    let floatOrZero = id => {
+      let v = document.getElementById(id).value;
+      return v ? parseFloat(v) : 0.0;
+    };
+
     for (let row = 0; row < 3; ++row) {
       for (let col = 0; col < 3; ++col) {
-        let htmlId = `#m${row}${col}`;
-        state.bFromA.elements[matrixIndex(row, col)] = parseFloat($(htmlId).val());
+        let htmlId = `m${row}${col}`;
+        state.bFromA.elements[matrixIndex(row, col)] = floatOrZero(htmlId);
       }
     }
 
