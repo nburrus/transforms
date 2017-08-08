@@ -143,7 +143,7 @@
 
 <script type="application/javascript">
   var state = {};
-  state.aFromB = new THREE.Matrix4(); // the transform
+  state.bFromA = new THREE.Matrix4(); // the transform
 
   let matrixIndex = (r, c) => {
     return c * 4 + r;
@@ -161,7 +161,7 @@
   let updateRotationMatrixView = function() {
 
     let elmToStr = (row, col) => {
-      let v = state.aFromB.elements[matrixIndex(row, col)];
+      let v = state.bFromA.elements[matrixIndex(row, col)];
       return prettyFloat(v);
     };
 
@@ -176,22 +176,55 @@
 
   let updateEulerView = function() {
     let eulerAngles = new THREE.Euler();
-    eulerAngles.setFromRotationMatrix(state.aFromB, 'ZYX');
+    eulerAngles.setFromRotationMatrix(state.bFromA, 'ZYX');
     $('#euler-x').val(prettyFloat(rad2deg(eulerAngles.x)));
     $('#euler-y').val(prettyFloat(rad2deg(eulerAngles.y)));
     $('#euler-z').val(prettyFloat(rad2deg(eulerAngles.z)));
   };
 
+  let updateQuaternionView = function() {
+    let q = new THREE.Quaternion();
+    q.setFromRotationMatrix(state.bFromA);
+    $('#quaternion-x').val(prettyFloat(q.x));
+    $('#quaternion-y').val(prettyFloat(q.y));
+    $('#quaternion-z').val(prettyFloat(q.z));
+    $('#quaternion-w').val(prettyFloat(q.w));
+  };
+
+  let updateAngleAxisView = function() {
+    let q = new THREE.Quaternion();
+    q.setFromRotationMatrix(state.bFromA);
+    let angle = 2.0 * Math.acos(q.w);
+    let s = Math.sqrt(1 - q.w * q.w);
+    let x, y, z;
+    if (s < 0.001) { // test to avoid divide by zero, s is always positive due to sqrt
+      // if s close to zero then direction of axis not important
+      x = q.x; // if it is important that axis is normalised then replace with x=1; y=z=0;
+      y = q.y;
+      z = q.z;
+    } else {
+      x = q.x / s; // normalise axis
+      y = q.y / s;
+      z = q.z / s;
+    }
+    $('#angle-axis-x').val(prettyFloat(x));
+    $('#angle-axis-y').val(prettyFloat(y));
+    $('#angle-axis-z').val(prettyFloat(z));
+    $('#angle-axis-theta').val(prettyFloat(rad2deg(angle)));
+  };
+
   let updateViewFrom = function(from) {
     if (from != 'rotationMatrix') updateRotationMatrixView();
     if (from != 'eulerAngles') updateEulerView();
+    if (from != 'quaternion') updateQuaternionView();
+    if (from != 'angleAxis') updateAngleAxisView();
   };
 
   let onRotationMatrixChange = function() {
     for (let row = 0; row < 3; ++row) {
       for (let col = 0; col < 3; ++col) {
         let htmlId = `#m${row}${col}`;
-        state.aFromB.elements[matrixIndex(row, col)] = parseFloat($(htmlId).val());
+        state.bFromA.elements[matrixIndex(row, col)] = parseFloat($(htmlId).val());
       }
     }
 
@@ -204,13 +237,51 @@
       return v ? parseFloat(v) * Math.PI / 180.0 : 0.0;
     };
     let euler = new THREE.Euler(floatRadiansOrZero("euler-x"), floatRadiansOrZero("euler-y"), floatRadiansOrZero("euler-z"), 'ZYX');
-    state.aFromB.makeRotationFromEuler(euler);
+    state.bFromA.makeRotationFromEuler(euler);
     updateViewFrom('eulerAngles');
+  };
+
+  let onQuaternionChange = function() {
+    let floatOrZero = id => {
+      let v = document.getElementById(id).value;
+      return v ? parseFloat(v) : 0.0;
+    };
+    let q = new THREE.Quaternion(
+      floatOrZero("quaternion-x"),
+      floatOrZero("quaternion-y"),
+      floatOrZero("quaternion-z"),
+      floatOrZero("quaternion-w"));
+    q.normalize();
+    state.bFromA.makeRotationFromQuaternion(q);
+    updateViewFrom('quaternion');
+  };
+
+  let onAngleAxisChange = function() {
+    let floatOrZero = id => {
+      let v = document.getElementById(id).value;
+      return v ? parseFloat(v) : 0.0;
+    };
+    let q = new THREE.Quaternion();
+    q.setFromAngleAxis(new THREE.Vector3(
+        floatOrZero("angle-axis-x"),
+        floatOrZero("angle-axis-x"),
+        floatOrZero("angle-axis-x")),
+      180.0 * floatOrZero("angle-axis-theta") / Math.PI);
+    state.bFromA.makeRotationFromQuaternion(q);
+    updateViewFrom('angleAxis');
   };
 
   let onInit = function() {
     for (let id of['euler-x', 'euler-y', 'euler-z']) {
       $(`#${id}`).on('input', onEulerChange);
+    }
+
+    for (let id of['quaternion-x', 'quaternion-y', 'quaternion-z', 'quaternion-w']) {
+      $(`#${id}`).on('input', onQuaternionChange);
+    }
+
+    for (let id of['angle-axis-x', 'angle-axis-y', 'angle-axis-z', 'angle-axis-theta']) {
+      $(`#${id}`).on('input', onAngleAxisChange);
     }
 
     for (let row = 0; row < 3; ++row)
@@ -251,8 +322,8 @@
     <div class="flex-row row bg-1-2">
       <div class="col-xs-24">
         <p>
-          We are considering the rotation that goes from a coordinate system \(B\) to a coordinate system \(A\), noted \(AfromB\). This notation allows to combine transforms without ambiguity, e.g \(AfromC = AfromB * BfromC\), and applies naturally to a point on
-          the right: \(pointInA = AfromB * pointInB\)
+          We are considering the rotation that goes from a coordinate system \(A\) to a coordinate system \(B\), noted \(BfromA\). This notation allows to combine transforms without ambiguity, e.g \(BfromC = BfromA * AfromC\), and applies naturally to a point on
+          the right: \(pointInB = BfromA * pointInA\)
         </p>
       </div>
     </div>
@@ -267,9 +338,10 @@
         </p>
         <div id="euler-popover-content" class="hide">
           <p>
-            They are defined in Z-Y-X,
-            <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a> ,Intrinsics.
-            <br> \[AfromB = R(Z) * R(Y) * R(X)\] This means that a point gets transformed by first applying the rotation around X, then around the new Y, then around the new Z.
+            Here they are defined in the Z-Y-X order,
+            <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>, Intrinsics.
+            <br> \[BfromA = R(Z) * R(Y) * R(X)\] This means that a point gets transformed by first applying the rotation around X, then around the new Y, then around the new Z.
+            <br><br> If you are trying to simulate the transform with your fingers, don't forget that applying these angles in sequence will make your finger-axes go from B to A, not from A to B!
           </p>
         </div>
         <table class="table packed">
@@ -365,7 +437,7 @@
         </p>
         <div id="rotation-matrix-popover-content" class="hide">
           <p>
-            Rotation matrices are 3x3. The row vectors are xxx.
+            Rotation matrices are 3x3. The <b>row vectors</b> are the coordinates of each axis of B expressed in A. The <b>columns vectors</b> are the coordinates of each axis of A expressed in B.
           </p>
         </div>
         <table class="table packed">
@@ -390,6 +462,11 @@
       </div>
     </div>
 
+    <div class="flex-row row">
+      <div class="col col-xs-24 bg-1-1">
+        WEBGL!
+      </div>
+    </div>
   </div>
 
 </body>
