@@ -262,11 +262,11 @@
       return v ? parseFloat(v) : 0.0;
     };
     let q = new THREE.Quaternion();
-    q.setFromAngleAxis(new THREE.Vector3(
+    q.setFromAxisAngle(new THREE.Vector3(
         floatOrZero("angle-axis-x"),
-        floatOrZero("angle-axis-x"),
-        floatOrZero("angle-axis-x")),
-      180.0 * floatOrZero("angle-axis-theta") / Math.PI);
+        floatOrZero("angle-axis-y"),
+        floatOrZero("angle-axis-z")),
+      Math.PI * floatOrZero("angle-axis-theta") / 180.0);
     state.bFromA.makeRotationFromQuaternion(q);
     updateViewFrom('angleAxis');
   };
