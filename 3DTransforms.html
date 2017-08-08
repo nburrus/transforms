@@ -174,6 +174,68 @@
       }
   };
 
+  let updateRotationMatrixVectorConversion = function() {
+    let getRow = (rowIndex) => {
+      return new THREE.Vector3(state.bFromA.elements[matrixIndex(rowIndex, 0)],
+        state.bFromA.elements[matrixIndex(rowIndex, 1)],
+        state.bFromA.elements[matrixIndex(rowIndex, 2)]);
+    };
+
+    let isPermutationWithEps = (row, eps) => {
+      let numZeros = (Math.round(row.x / eps) == 0) +
+        (Math.round(row.y / eps) == 0) +
+        (Math.round(row.z / eps) == 0);
+      return numZeros == 2;
+    };
+
+    let isPerfectPermutation = (row) => {
+      return isPermutationWithEps(row, 1e-5);
+    };
+
+    let approxZeroThreshold = 0.2;
+
+    let isApproxPermutation = (row) => {
+      return isPermutationWithEps(row, approxZeroThreshold);
+    };
+
+    let row0 = getRow(0);
+    let row1 = getRow(1);
+    let row2 = getRow(2);
+
+    let allPerfect = (isPerfectPermutation(row0) &&
+      isPerfectPermutation(row1) &&
+      isPerfectPermutation(row2));
+
+    let allApprox = (isApproxPermutation(row0) &&
+      isApproxPermutation(row1) &&
+      isApproxPermutation(row2));
+
+    if (!allApprox) {
+      $('#matrix-vector-a-from-b').html("not a permutation");
+      return;
+    }
+
+    let eqOrApproxEq = (allPerfect ? "=" : "~=");
+
+    let getNonZeroName = (row) => {
+      if (Math.abs(Math.abs(row.x) - 1.0) < approxZeroThreshold)
+        return row.x < 0 ? '-X_A' : 'X_A';
+      if (Math.abs(Math.abs(row.y) - 1.0) < approxZeroThreshold)
+        return row.y < 0 ? '-Y_A' : 'Y_A';
+      if (Math.abs(Math.abs(row.z) - 1.0) < approxZeroThreshold)
+        return row.z < 0 ? '-Z_A' : 'Z_A';
+    };
+
+    let X_B = getNonZeroName(row0);
+    let Y_B = getNonZeroName(row1);
+    let Z_B = getNonZeroName(row2);
+
+    let formula = $('#matrix-vector-a-from-b');
+
+    formula.html(`$$ [X_B, Y_B, Z_B] ${eqOrApproxEq} [${X_B}, ${Y_B}, ${Z_B}] $$`);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, formula.get()]);
+  }
+
   let updateEulerView = function() {
     let eulerAngles = new THREE.Euler();
     eulerAngles.setFromRotationMatrix(state.bFromA, 'ZYX');
@@ -218,6 +280,7 @@
     if (from != 'eulerAngles') updateEulerView();
     if (from != 'quaternion') updateQuaternionView();
     if (from != 'angleAxis') updateAngleAxisView();
+    updateRotationMatrixVectorConversion();
   };
 
   let onRotationMatrixChange = function() {
@@ -314,7 +377,7 @@
     <div class="row">
       <div class="col bg-1-1">
         <div class="page-header">
-          <h1 class="text-center">3D Rotation Conversion</h1>
+          <h1 class="text-center">3D Rotation Conversion - \(B from A\)</h1>
         </div>
       </div>
     </div>
@@ -459,6 +522,9 @@
             </tr>
           </tbody>
         </table>
+        <div id="matrix-vector-a-from-b">
+          $$[X,Y,Z]_B = [Y, -Z, X]_A$$
+        </div>
       </div>
     </div>
 
