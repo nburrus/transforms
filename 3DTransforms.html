@@ -215,7 +215,7 @@
       return;
     }
 
-    let eqOrApproxEq = (allPerfect ? "=" : "~=");
+    let eqOrApproxEq = (allPerfect ? '=' : '\\approx');
 
     let getNonZeroName = (row) => {
       if (Math.abs(Math.abs(row.x) - 1.0) < approxZeroThreshold)
