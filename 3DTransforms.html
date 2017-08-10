@@ -4,6 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js"></script>
+<script src="OrbitControls.js"></script>
 
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
@@ -138,6 +139,10 @@
   .help-tip:hover {
     background: #fff;
     color: #aaaaaa;
+  }
+  
+  .webgl-view {
+    margin: 1em auto;
   }
 </style>
 
@@ -339,6 +344,58 @@
     updateViewFrom('angleAxis');
   };
 
+  let createWebGLScene = function() {
+    let scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdddddd);
+
+    let aspectRatio = 4.0 / 3;
+    let camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+
+    let renderer = new THREE.WebGLRenderer();
+    renderer.domElement.classList.add('webgl-view');
+    $('#webgl-view').append(renderer.domElement);
+
+    let setRenderSize = function() {
+      let newWidth = window.innerWidth * 0.9;
+      if (newWidth > 800)
+        newWidth = window.innerWidth * 0.5;
+      renderer.setSize(newWidth, newWidth / aspectRatio);
+    };
+
+    $(window).on('resize', function() {
+      setRenderSize();
+    });
+
+    setRenderSize();
+
+    let geometry = new THREE.BoxGeometry(1, 1, 1);
+    let material = new THREE.MeshBasicMaterial({
+      color: 0x00aaff
+    });
+    let cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    camera.position.z = 2;
+
+    let render = function() {
+      renderer.render(scene, camera);
+    };
+
+    controls = new THREE.OrbitControls(camera);
+    controls.addEventListener('change', render);
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    // controls.minDistance = 1.0;
+    // controls.maxDistance = 10.0;
+
+    let animate = function() {
+      requestAnimationFrame(animate);
+      render();
+    };
+
+    animate();
+  };
+
   let onInit = function() {
     for (let id of['euler-x', 'euler-y', 'euler-z']) {
       $(`#${id}`).on('input', onEulerChange);
@@ -371,6 +428,8 @@
         }
       });
     });
+
+    createWebGLScene();
   }
 
   $(document).ready(onInit);
@@ -534,8 +593,7 @@
     </div>
 
     <div class="flex-row row">
-      <div class="col col-xs-24 bg-1-1">
-        WEBGL!
+      <div class="col col-xs-24 bg-1-1 text-center" id="webgl-view">
       </div>
     </div>
   </div>
