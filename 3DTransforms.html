@@ -427,11 +427,17 @@
 
     setRenderSize();
 
+    let bGroup = new THREE.Group();
+    scene.add(bGroup);
+
+    let aGroup = new THREE.Group();
+    scene.add(aGroup);
+
     let axisBGroup = new THREE.Group();
-    scene.add(axisBGroup);
+    bGroup.add(axisBGroup);
 
     let axisAGroup = new THREE.Group();
-    scene.add(axisAGroup);
+    aGroup.add(axisAGroup);
 
     let arrowDirAndColors = [{
       dir: new THREE.Vector3(1, 0, 0),
@@ -446,7 +452,7 @@
 
     arrowDirAndColors.forEach((params) => {
       let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
-      let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
+      let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
       axisAGroup.add(arrowA);
       axisBGroup.add(arrowB);
     });
@@ -458,16 +464,16 @@
       return label;
     };
 
-    createLabel(axisAGroup, "X_A", 0.6, 0.05, 0);
-    createLabel(axisAGroup, "Y_A", 0.05, 0.6, 0);
-    createLabel(axisAGroup, "Z_A", 0.05, 0.0, 0.6);
+    createLabel(axisAGroup, "X_A", 0.7, 0.05, 0.05);
+    createLabel(axisAGroup, "Y_A", 0.05, 0.7, 0.05);
+    createLabel(axisAGroup, "Z_A", 0.05, 0.05, 0.7);
 
-    createLabel(axisBGroup, "X_B", 0.6, 0.05, 0);
-    createLabel(axisBGroup, "Y_B", 0.05, 0.6, 0);
-    createLabel(axisBGroup, "Z_B", 0.05, 0, 0.6);
+    createLabel(axisBGroup, "X_B", 1.0, 0.05, 0.05);
+    createLabel(axisBGroup, "Y_B", 0.05, 1.0, 0.05);
+    createLabel(axisBGroup, "Z_B", 0.05, 0.05, 1.0);
 
-    axisAGroup.position.set(-1, 0.0, 0.0);
-    axisBGroup.position.set(1, 0.0, 0.0);
+    // aGroup.position.set(-1, 0.0, 0.0);
+    // bGroup.position.set(1, 0.0, 0.0);
 
     glView = {};
     glView.scene = scene;
@@ -475,7 +481,7 @@
     glView.axisBGroup = axisBGroup;
     glView.renderer = renderer;
 
-    camera.position.z = 2.5;
+    camera.position.z = 2.;
 
     controls = new THREE.OrbitControls(camera, webglViewElement.get(0));
     controls.addEventListener('change', renderGLScene);
