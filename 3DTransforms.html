@@ -148,6 +148,7 @@
 <script type="application/javascript">
   var state = {};
   state.bFromA = new THREE.Matrix4(); // the transform
+  var glView = undefined;
 
   let matrixIndex = (r, c) => {
     return c * 4 + r;
@@ -285,6 +286,8 @@
     if (from != 'quaternion') updateQuaternionView();
     if (from != 'angleAxis') updateAngleAxisView();
     updateRotationMatrixVectorConversion();
+    if (glView)
+      updateGLAxes();
   };
 
   let onRotationMatrixChange = function() {
@@ -379,6 +382,17 @@
     return sprite;
   };
 
+  let updateGLAxes = function() {
+    let aFromB = new THREE.Matrix4();
+    aFromB.getInverse(state.bFromA);
+    glView.axisBGroup.setRotationFromMatrix(aFromB);
+    renderGLScene();
+  };
+
+  let renderGLScene = function() {
+    glView.renderer.render(glView.scene, glView.camera);
+  };
+
   let createWebGLScene = function() {
     let scene = new THREE.Scene();
     scene.background = new THREE.Color(0xdddddd);
@@ -413,35 +427,58 @@
 
     setRenderSize();
 
-    let xarrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 1, 0xff0000);
-    let yarrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0x00ff00);
-    let zarrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0x0000ff);
+    let axisBGroup = new THREE.Group();
+    scene.add(axisBGroup);
 
-    let arrows = [xarrow, yarrow, zarrow];
-    arrows.forEach((arrow) => scene.add(arrow));
+    let axisAGroup = new THREE.Group();
+    scene.add(axisAGroup);
 
-    let createLabel = (name, x, y, z) => {
+    let arrowDirAndColors = [{
+      dir: new THREE.Vector3(1, 0, 0),
+      color: 0xff0000
+    }, {
+      dir: new THREE.Vector3(0, 1, 0),
+      color: 0x00ff00
+    }, {
+      dir: new THREE.Vector3(0, 0, 1),
+      color: 0x0000ff
+    }];
+
+    arrowDirAndColors.forEach((params) => {
+      let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
+      let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
+      axisAGroup.add(arrowA);
+      axisBGroup.add(arrowB);
+    });
+
+    let createLabel = (group, name, x, y, z) => {
       let label = makeTextSprite(name);
       label.position.set(x, y, z);
-      scene.add(label);
+      group.add(label);
+      return label;
     };
 
-    createLabel("X_A", 1, 0.05, 0);
-    createLabel("Y_A", 0.05, 1, 0);
-    createLabel("Z_A", 0.0, 0.05, 1);
+    createLabel(axisAGroup, "X_A", 0.6, 0.05, 0);
+    createLabel(axisAGroup, "Y_A", 0.05, 0.6, 0);
+    createLabel(axisAGroup, "Z_A", 0.05, 0.0, 0.6);
 
-    createLabel("X_B", 1, -0.1, 0);
-    createLabel("Y_B", 0, 1 - 0.1, 0);
-    createLabel("Z_B", 0, -0.1, 1);
+    createLabel(axisBGroup, "X_B", 0.6, 0.05, 0);
+    createLabel(axisBGroup, "Y_B", 0.05, 0.6, 0);
+    createLabel(axisBGroup, "Z_B", 0.05, 0, 0.6);
 
-    let render = function() {
-      renderer.render(scene, camera);
-    };
+    axisAGroup.position.set(-1, 0.0, 0.0);
+    axisBGroup.position.set(1, 0.0, 0.0);
 
-    camera.position.z = 2;
+    glView = {};
+    glView.scene = scene;
+    glView.camera = camera;
+    glView.axisBGroup = axisBGroup;
+    glView.renderer = renderer;
+
+    camera.position.z = 2.5;
 
     controls = new THREE.OrbitControls(camera, webglViewElement.get(0));
-    controls.addEventListener('change', render);
+    controls.addEventListener('change', renderGLScene);
     controls.enablePan = false;
     controls.enableZoom = false;
 
@@ -452,11 +489,11 @@
 
     let animate = function() {
       requestAnimationFrame(animate);
-      render();
+      renderGLScene();
     };
 
     // animate();
-    render();
+    renderGLScene();
   };
 
   let onInit = function() {
