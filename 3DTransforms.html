@@ -343,6 +343,42 @@
     updateViewFrom('angleAxis');
   };
 
+  let makeTextSprite = function(message, parameters) {
+    if (parameters === undefined) parameters = {};
+    let fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
+    let fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 24;
+    let textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : {
+      r: 0,
+      g: 0,
+      b: 0,
+      a: 1.0
+    };
+
+    let canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 64;
+    var context = canvas.getContext('2d');
+    context.font = "Bold " + fontsize + "px " + fontface;
+    var metrics = context.measureText(message);
+    var textWidth = metrics.width;
+
+    context.fillStyle = "rgba(" + textColor.r + ", " + textColor.g + ", " + textColor.b + ", 1.0)";
+    context.fillText(message, canvas.width / 2, canvas.height / 2);
+
+    var texture = new THREE.Texture(canvas)
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({
+      map: texture,
+      depthTest: false,
+      depthWrite: false
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    let aspectRatio = canvas.width / canvas.height;
+    sprite.scale.set(0.25 * aspectRatio, 0.25 * 1, 1);
+    return sprite;
+  };
+
   let createWebGLScene = function() {
     let scene = new THREE.Scene();
     scene.background = new THREE.Color(0xdddddd);
@@ -350,8 +386,16 @@
     let aspectRatio = 4.0 / 3;
     let camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
 
-    let renderer = new THREE.WebGLRenderer();
+    scene.add(new THREE.AmbientLight(0x404040));
+    let light = new THREE.DirectionalLight(0xffffff);
+    light.position.set(0, 1, 0);
+    scene.add(light);
+
+    let renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     renderer.domElement.classList.add('webgl-view');
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     let webglViewElement = $('#webgl-view');
     webglViewElement.append(renderer.domElement);
@@ -369,23 +413,40 @@
 
     setRenderSize();
 
-    let geometry = new THREE.BoxGeometry(1, 1, 1);
-    let material = new THREE.MeshBasicMaterial({
-      color: 0x00aaff
-    });
-    let cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    let xarrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 1, 0xff0000);
+    let yarrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0x00ff00);
+    let zarrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0x0000ff);
 
-    camera.position.z = 2;
+    let arrows = [xarrow, yarrow, zarrow];
+    arrows.forEach((arrow) => scene.add(arrow));
+
+    let createLabel = (name, x, y, z) => {
+      let label = makeTextSprite(name);
+      label.position.set(x, y, z);
+      scene.add(label);
+    };
+
+    createLabel("X_A", 1, 0.05, 0);
+    createLabel("Y_A", 0.05, 1, 0);
+    createLabel("Z_A", 0.0, 0.05, 1);
+
+    createLabel("X_B", 1, -0.1, 0);
+    createLabel("Y_B", 0, 1 - 0.1, 0);
+    createLabel("Z_B", 0, -0.1, 1);
 
     let render = function() {
       renderer.render(scene, camera);
     };
 
+    camera.position.z = 2;
+
     controls = new THREE.OrbitControls(camera, webglViewElement.get(0));
     controls.addEventListener('change', render);
     controls.enablePan = false;
     controls.enableZoom = false;
+
+    // controls.target = new THREE.Vector3(0, 0, 0);
+
     // controls.minDistance = 1.0;
     // controls.maxDistance = 10.0;
 
