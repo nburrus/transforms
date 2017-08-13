@@ -352,7 +352,9 @@
 
     let renderer = new THREE.WebGLRenderer();
     renderer.domElement.classList.add('webgl-view');
-    $('#webgl-view').append(renderer.domElement);
+
+    let webglViewElement = $('#webgl-view');
+    webglViewElement.append(renderer.domElement);
 
     let setRenderSize = function() {
       let newWidth = window.innerWidth * 0.9;
@@ -380,7 +382,7 @@
       renderer.render(scene, camera);
     };
 
-    controls = new THREE.OrbitControls(camera);
+    controls = new THREE.OrbitControls(camera, webglViewElement.get(0));
     controls.addEventListener('change', render);
     controls.enablePan = false;
     controls.enableZoom = false;
