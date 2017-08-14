@@ -2,11 +2,10 @@
 <html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="jquery.min.js"></script>
-<script src="three.min.js"></script>
-<script src="OrbitControls.js"></script>
-<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-<script src="bootstrap.min.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/bootstrap.min.js"></script>
 
 <!-- Generated through https://www.bootstrap-live-customizer.com/ .
      First selecting the Cosmo theme. -->
@@ -24,6 +23,21 @@
   input[type="number"] {
     -moz-appearance: textfield;
     text-align: center;
+  }
+  
+  .math {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-style: italic;
+  }
+  
+  .mathDisplay {
+    display: block;
+    text-align: center;
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 10px;
+    white-space: nowrap;
   }
   /* Fixed size for our pretty float */
   
@@ -224,11 +238,11 @@
 
     let getNonZeroName = (row) => {
       if (Math.abs(Math.abs(row.x) - 1.0) < approxZeroThreshold)
-        return row.x < 0 ? '-X_A' : 'X_A';
+        return row.x < 0 ? '-X<sub>A</sub>' : 'X<sub>A</sub>';
       if (Math.abs(Math.abs(row.y) - 1.0) < approxZeroThreshold)
-        return row.y < 0 ? '-Y_A' : 'Y_A';
+        return row.y < 0 ? '-Y<sub>A</sub>' : 'Y<sub>A</sub>';
       if (Math.abs(Math.abs(row.z) - 1.0) < approxZeroThreshold)
-        return row.z < 0 ? '-Z_A' : 'Z_A';
+        return row.z < 0 ? '-Z<sub>A</sub>' : 'Z<sub>A</sub>';
     };
 
     let X_B = getNonZeroName(row0);
@@ -237,8 +251,7 @@
 
     let formula = $('#matrix-vector-a-from-b');
 
-    formula.html(`$$ [X_B, Y_B, Z_B] ${eqOrApproxEq} [${X_B}, ${Y_B}, ${Z_B}] $$`);
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub, formula.get()]);
+    formula.html(`<span class="mathDisplay">[X<sub>B</sub>, Y<sub>B</sub>, Z<sub>B</sub>] ${eqOrApproxEq} [${X_B}, ${Y_B}, ${Z_B}]</span>`);
   }
 
   let updateEulerView = function() {
@@ -547,7 +560,7 @@
     <div class="row">
       <div class="col bg-1-1">
         <div class="page-header">
-          <h1 class="text-center">3D Rotation Conversion - \(B from A\)</h1>
+          <h1 class="text-center">3D Rotation Conversion - <span class="math">BfromA</span></h1>
         </div>
       </div>
     </div>
@@ -555,8 +568,8 @@
     <div class="flex-row row bg-1-2">
       <div class="col-xs-24">
         <p>
-          We are considering the rotation that goes from a coordinate system \(A\) to a coordinate system \(B\), noted \(BfromA\). This notation allows to combine transforms without ambiguity, e.g \(BfromC = BfromA * AfromC\), and applies naturally to a point on
-          the right: \(pointInB = BfromA * pointInA\)
+          We are considering the rotation that goes from a coordinate system <span class="math">A</span> to a coordinate system <span class="math">B</span>, noted <span class="math">BfromA</span>. This notation allows to combine transforms without ambiguity,
+          e.g <span class="math">BfromC = BfromA * AfromC</span>, and applies naturally to a point on the right: <span class="math">pointInB = BfromA * pointInA</span>
         </p>
       </div>
     </div>
@@ -573,7 +586,7 @@
           <p>
             Here they are defined in the Z-Y-X order,
             <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>, Intrinsics.
-            <br> \[BfromA = R(Z) * R(Y) * R(X)\] This means that a point gets transformed by first applying the rotation around X, then around the new Y, then around the new Z.
+            <p><span class="mathDisplay">BfromA = R(Z) * R(Y) * R(X)</span></p> This means that a point gets transformed by first applying the rotation around X, then around the new Y, then around the new Z.
             <br><br> If you are trying to simulate the transform with your fingers, don't forget that applying these angles in sequence will make your finger-axes go from B to A, not from A to B!
           </p>
         </div>
