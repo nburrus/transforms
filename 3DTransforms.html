@@ -428,9 +428,9 @@
     webglViewElement.append(renderer.domElement);
 
     let setRenderSize = function() {
-      let newWidth = window.innerWidth * 0.9;
+      let newWidth = webglViewElement.width();
       if (newWidth > 800)
-        newWidth = window.innerWidth * 0.5;
+        newWidth = webglViewElement.width() * 0.5;
       renderer.setSize(newWidth, newWidth / aspectRatio);
     };
 
