@@ -29,6 +29,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	this.staticMoving = false;
 	this.dynamicDampingFactor = 0.2;
+	this.enableDamping = true;
 
 	this.minDistance = 0;
 	this.maxDistance = Infinity;
@@ -378,6 +379,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		}
 
+		if (_this.enableDamping == false)
+            _this.update();
 	}
 
 	function keyup( event ) {
@@ -418,10 +421,14 @@ THREE.TrackballControls = function ( object, domElement ) {
 			_panStart.copy( getMouseOnScreen( event.pageX, event.pageY ) );
 			_panEnd.copy( _panStart );
 
+		} else {
+			_state = STATE.NONE;
 		}
 
-		document.addEventListener( 'mousemove', mousemove, false );
-		document.addEventListener( 'mouseup', mouseup, false );
+		if (_state !== STATE.NONE) {
+            document.addEventListener('mousemove', mousemove, false);
+            document.addEventListener('mouseup', mouseup, false);
+        }
 
 		_this.dispatchEvent( startEvent );
 
@@ -449,6 +456,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		}
 
+		if (_this.enableDamping == false)
+            _this.update();
 	}
 
 	function mouseup( event ) {
@@ -468,7 +477,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	function mousewheel( event ) {
 
-		if ( _this.enabled === false ) return;
+		if ( _this.enabled === false || _this.noZoom == true) return;
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -495,6 +504,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 		_this.dispatchEvent( startEvent );
 		_this.dispatchEvent( endEvent );
 
+		if (_this.enableDamping == false)
+            _this.update();
 	}
 
 	function touchstart( event ) {
@@ -504,12 +515,15 @@ THREE.TrackballControls = function ( object, domElement ) {
 		switch ( event.touches.length ) {
 
 			case 1:
+				if (_this.noRotation) return;
 				_state = STATE.TOUCH_ROTATE;
 				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
 				_movePrev.copy( _moveCurr );
 				break;
 
 			default: // 2 or more
+				if (_this.noZoom || _this.noPan) return;
+
 				_state = STATE.TOUCH_ZOOM_PAN;
 				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
 				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
@@ -537,11 +551,15 @@ THREE.TrackballControls = function ( object, domElement ) {
 		switch ( event.touches.length ) {
 
 			case 1:
+				if (_this.noRotation) return;
+
 				_movePrev.copy( _moveCurr );
 				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
 				break;
 
 			default: // 2 or more
+				if (_this.noZoom || _this.noPan) return;
+
 				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
 				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
 				_touchZoomDistanceEnd = Math.sqrt( dx * dx + dy * dy );
@@ -553,6 +571,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		}
 
+		if (_this.enableDamping == false)
+            _this.update();
 	}
 
 	function touchend( event ) {
