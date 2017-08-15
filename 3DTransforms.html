@@ -437,6 +437,7 @@
     $(window).on('resize', function() {
       setRenderSize();
       controls.handleResize();
+      renderGLScene();
     });
 
     setRenderSize();
@@ -713,8 +714,9 @@
     </div>
 
     <div class="flex-row row">
-      <div class="col col-xs-24 bg-1-1 text-center" id="webgl-view">
-      </div>
+      <div class="col col-xs-2 bg-1-1 text-center"></div>
+      <div class="col col-xs-20 bg-1-1 text-center" id="webgl-view"></div>
+      <div class="col col-xs-2 bg-1-1 text-center"></div>
     </div>
   </div>
 
