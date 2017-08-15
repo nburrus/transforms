@@ -155,7 +155,7 @@
   }
   
   .webgl-view {
-    margin: 1em auto;
+    margin: 1em 0em;
   }
 </style>
 
@@ -410,7 +410,7 @@
     let scene = new THREE.Scene();
     scene.background = new THREE.Color(0xdddddd);
 
-    let aspectRatio = 4.0 / 3;
+    let aspectRatio = 2.0 / 1;
     let camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
 
     scene.add(new THREE.AmbientLight(0x404040));
@@ -429,8 +429,6 @@
 
     let setRenderSize = function() {
       let newWidth = webglViewElement.width();
-      if (newWidth > 800)
-        newWidth = webglViewElement.width() * 0.5;
       renderer.setSize(newWidth, newWidth / aspectRatio);
     };
 
@@ -498,7 +496,7 @@
 
     camera.position.z = 2.;
 
-    controls = new THREE.TrackballControls(camera, webglViewElement.get(0));
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
     controls.addEventListener('change', renderGLScene);
 
     controls.rotateSpeed = 2.0;
@@ -714,9 +712,9 @@
     </div>
 
     <div class="flex-row row">
-      <div class="col col-xs-2 bg-1-1 text-center"></div>
-      <div class="col col-xs-20 bg-1-1 text-center" id="webgl-view"></div>
-      <div class="col col-xs-2 bg-1-1 text-center"></div>
+      <div class="col-md-6 bg-1-1"></div>
+      <div class="col-xs-24 col-md-12 bg-1-1" id="webgl-view"></div>
+      <div class="col-md-6 bg-1-1"></div>
     </div>
   </div>
 
