@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="js/jquery.min.js"></script>
 <script src="js/three.min.js"></script>
-<script src="js/OrbitControls.js"></script>
+<script src="js/TrackballControls.js"></script>
 <script src="js/bootstrap.min.js"></script>
 
 <!-- Generated through https://www.bootstrap-live-customizer.com/ .
@@ -436,6 +436,7 @@
 
     $(window).on('resize', function() {
       setRenderSize();
+      controls.handleResize();
     });
 
     setRenderSize();
@@ -496,21 +497,21 @@
 
     camera.position.z = 2.;
 
-    controls = new THREE.OrbitControls(camera, webglViewElement.get(0));
+    controls = new THREE.TrackballControls(camera, webglViewElement.get(0));
     controls.addEventListener('change', renderGLScene);
-    controls.enablePan = false;
-    controls.enableZoom = false;
 
-    // controls.target = new THREE.Vector3(0, 0, 0);
-
-    // controls.minDistance = 1.0;
-    // controls.maxDistance = 10.0;
+    controls.rotateSpeed = 2.0;
+    controls.noZoom = true;
+    controls.noPan = true;
+    controls.noRotate = false;
+    controls.enableDamping = false; // don't need to animate this way
 
     let animate = function() {
       requestAnimationFrame(animate);
       renderGLScene();
     };
 
+    // No need to animate for now.
     // animate();
     renderGLScene();
   };
