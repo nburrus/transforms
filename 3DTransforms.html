@@ -363,7 +363,25 @@
 
     constructor(domIdName) {
       this.webglViewElement = $(domIdName);
-      this.createWebGLScene ();
+      this.createScene();
+      this.createViews();
+      this.renderGLScene();
+    }
+
+    createViews() {
+      this.views = [{
+        left: 0,
+        top: 0,
+        width: 0.5,
+        height: 1.0,
+        specificObjects: [this.bGroup],
+      }, {
+        left: 0.5,
+        top: 0,
+        width: 0.5,
+        height: 1.0,
+        specificObjects: [this.aGroup],
+      }];
     }
 
     updateGLAxes(bFromA) {
@@ -374,15 +392,42 @@
     }
 
     renderGLScene() {
-      this.renderer.render(this.scene, this.camera);
+      for (let view of this.views) {
+        let size = this.renderer.getSize();
+        var left = Math.floor(size.width * view.left);
+        var top = Math.floor(size.height * view.top);
+        var width = Math.floor(size.width * view.width);
+        var height = Math.floor(size.height * view.height);
+
+        this.renderer.setViewport(left, top, width, height);
+        this.renderer.setScissor(left, top, width, height);
+        this.renderer.setScissorTest(true);
+
+        view.specificObjects.forEach((obj) => {
+          obj.visible = true;
+        });
+
+        this.renderer.render(this.scene, this.camera);
+
+        view.specificObjects.forEach((obj) => {
+          obj.visible = false;
+        });
+      }
     }
 
-    createWebGLScene() {
+    // Not used, don't need an animation loop for now.
+    animate() {
+      requestAnimationFrame(animate);
+      this.renderGLScene();
+    };
+
+    createScene() {
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xdddddd);
 
-      let aspectRatio = 2.0 / 1;
-      this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+      let windowAspectRatio = 2.0 / 1; // window will have two viewports side by side
+      let cameraAspectRatio = 1.0 / 1; // each viewport will be a square
+      this.camera = new THREE.PerspectiveCamera(75, cameraAspectRatio, 0.1, 1000);
 
       this.scene.add(new THREE.AmbientLight(0x404040));
       let light = new THREE.DirectionalLight(0xffffff);
@@ -399,10 +444,10 @@
 
       let setRenderSize = () => {
         let newWidth = this.webglViewElement.width();
-        this.renderer.setSize(newWidth, newWidth / aspectRatio);
+        this.renderer.setSize(newWidth, newWidth / windowAspectRatio);
       };
 
-      $(window).on('resize', function() {
+      $(window).on('resize', () => {
         setRenderSize();
         this.controls.handleResize();
         this.renderGLScene();
@@ -411,9 +456,11 @@
       setRenderSize();
 
       this.bGroup = new THREE.Group();
+      this.bGroup.visible = false; // start hidden, each view will toggle it.
       this.scene.add(this.bGroup);
 
       this.aGroup = new THREE.Group();
+      this.aGroup.visible = false; // start hidden, each view will toggle it.
       this.scene.add(this.aGroup);
 
       this.axisBGroup = new THREE.Group();
@@ -434,7 +481,7 @@
       }];
 
       arrowDirAndColors.forEach((params) => {
-        let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
+        let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
         let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
         this.axisAGroup.add(arrowA);
         this.axisBGroup.add(arrowB);
@@ -447,9 +494,9 @@
         return label;
       };
 
-      createLabel(this.axisAGroup, "X_A", 0.7, 0.05, 0.05);
-      createLabel(this.axisAGroup, "Y_A", 0.05, 0.7, 0.05);
-      createLabel(this.axisAGroup, "Z_A", 0.05, 0.05, 0.7);
+      createLabel(this.axisAGroup, "X_A", 1.0, 0.05, 0.05);
+      createLabel(this.axisAGroup, "Y_A", 0.05, 1.0, 0.05);
+      createLabel(this.axisAGroup, "Z_A", 0.05, 0.05, 1.0);
 
       createLabel(this.axisBGroup, "X_B", 1.0, 0.05, 0.05);
       createLabel(this.axisBGroup, "Y_B", 0.05, 1.0, 0.05);
@@ -468,15 +515,6 @@
       this.controls.noPan = true;
       this.controls.noRotate = false;
       this.controls.enableDamping = false; // don't need to animate this way
-
-      let animate = function() {
-        requestAnimationFrame(animate);
-        this.renderGLScene();
-      };
-
-      // No need to animate for now.
-      // animate();
-      this.renderGLScene();
     }
 
     _makeTextSprite(message, parameters) {
@@ -511,7 +549,7 @@
       });
       var sprite = new THREE.Sprite(spriteMaterial);
       let aspectRatio = canvas.width / canvas.height;
-      sprite.scale.set(0.25 * aspectRatio, 0.25 * 1, 1);
+      sprite.scale.set(0.3 * aspectRatio, 0.3 * 1, 1);
       return sprite;
     };
 
