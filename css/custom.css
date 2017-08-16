@@ -64,6 +64,10 @@ input[type="number"] {
 
 /* Bootstrap */
 
+p.vcenter {
+    margin: 0.5em auto;
+}
+
 .page-header {
     margin-top: 1em;
     margin-bottom: 1em;
@@ -89,7 +93,7 @@ input[type="number"] {
 }
 
 .row.bg-1-2 {
-    background-color: #7e9a9a;
+    background-color: #cccccc;
 }
 
 /* This is here to make all the columns have the same height. */
