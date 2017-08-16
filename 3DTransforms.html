@@ -300,7 +300,7 @@
     if (from != 'angleAxis') updateAngleAxisView();
     updateRotationMatrixVectorConversion();
     if (glView)
-      updateGLAxes();
+      glView.updateGLAxes(state.bFromA);
   };
 
   let onRotationMatrixChange = function() {
@@ -359,160 +359,162 @@
     updateViewFrom('angleAxis');
   };
 
-  let makeTextSprite = function(message, parameters) {
-    if (parameters === undefined) parameters = {};
-    let fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
-    let fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 24;
-    let textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : {
-      r: 0,
-      g: 0,
-      b: 0,
-      a: 1.0
-    };
+  class GLView {
 
-    let canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 64;
-    var context = canvas.getContext('2d');
-    context.font = "Bold " + fontsize + "px " + fontface;
-    var metrics = context.measureText(message);
-    var textWidth = metrics.width;
+    constructor(domIdName) {
+      this.webglViewElement = $(domIdName);
+      this.createWebGLScene ();
+    }
 
-    context.fillStyle = "rgba(" + textColor.r + ", " + textColor.g + ", " + textColor.b + ", 1.0)";
-    context.fillText(message, canvas.width / 2, canvas.height / 2);
+    updateGLAxes(bFromA) {
+      let aFromB = new THREE.Matrix4();
+      aFromB.getInverse(bFromA);
+      this.axisBGroup.setRotationFromMatrix(aFromB);
+      this.renderGLScene();
+    }
 
-    var texture = new THREE.Texture(canvas)
-    texture.needsUpdate = true;
+    renderGLScene() {
+      this.renderer.render(this.scene, this.camera);
+    }
 
-    var spriteMaterial = new THREE.SpriteMaterial({
-      map: texture,
-      depthTest: false,
-      depthWrite: false
-    });
-    var sprite = new THREE.Sprite(spriteMaterial);
-    let aspectRatio = canvas.width / canvas.height;
-    sprite.scale.set(0.25 * aspectRatio, 0.25 * 1, 1);
-    return sprite;
-  };
+    createWebGLScene() {
+      this.scene = new THREE.Scene();
+      this.scene.background = new THREE.Color(0xdddddd);
 
-  let updateGLAxes = function() {
-    let aFromB = new THREE.Matrix4();
-    aFromB.getInverse(state.bFromA);
-    glView.axisBGroup.setRotationFromMatrix(aFromB);
-    renderGLScene();
-  };
+      let aspectRatio = 2.0 / 1;
+      this.camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
 
-  let renderGLScene = function() {
-    glView.renderer.render(glView.scene, glView.camera);
-  };
+      this.scene.add(new THREE.AmbientLight(0x404040));
+      let light = new THREE.DirectionalLight(0xffffff);
+      light.position.set(0, 1, 0);
+      this.scene.add(light);
 
-  let createWebGLScene = function() {
-    let scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdddddd);
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true
+      });
+      this.renderer.domElement.classList.add('webgl-view');
+      this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    let aspectRatio = 2.0 / 1;
-    let camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
+      this.webglViewElement.append(this.renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0x404040));
-    let light = new THREE.DirectionalLight(0xffffff);
-    light.position.set(0, 1, 0);
-    scene.add(light);
+      let setRenderSize = () => {
+        let newWidth = this.webglViewElement.width();
+        this.renderer.setSize(newWidth, newWidth / aspectRatio);
+      };
 
-    let renderer = new THREE.WebGLRenderer({
-      antialias: true
-    });
-    renderer.domElement.classList.add('webgl-view');
-    renderer.setPixelRatio(window.devicePixelRatio);
+      $(window).on('resize', function() {
+        setRenderSize();
+        this.controls.handleResize();
+        this.renderGLScene();
+      });
 
-    let webglViewElement = $('#webgl-view');
-    webglViewElement.append(renderer.domElement);
-
-    let setRenderSize = function() {
-      let newWidth = webglViewElement.width();
-      renderer.setSize(newWidth, newWidth / aspectRatio);
-    };
-
-    $(window).on('resize', function() {
       setRenderSize();
-      controls.handleResize();
-      renderGLScene();
-    });
 
-    setRenderSize();
+      this.bGroup = new THREE.Group();
+      this.scene.add(this.bGroup);
 
-    let bGroup = new THREE.Group();
-    scene.add(bGroup);
+      this.aGroup = new THREE.Group();
+      this.scene.add(this.aGroup);
 
-    let aGroup = new THREE.Group();
-    scene.add(aGroup);
+      this.axisBGroup = new THREE.Group();
+      this.bGroup.add(this.axisBGroup);
 
-    let axisBGroup = new THREE.Group();
-    bGroup.add(axisBGroup);
+      this.axisAGroup = new THREE.Group();
+      this.aGroup.add(this.axisAGroup);
 
-    let axisAGroup = new THREE.Group();
-    aGroup.add(axisAGroup);
+      let arrowDirAndColors = [{
+        dir: new THREE.Vector3(1, 0, 0),
+        color: 0xff0000
+      }, {
+        dir: new THREE.Vector3(0, 1, 0),
+        color: 0x00ff00
+      }, {
+        dir: new THREE.Vector3(0, 0, 1),
+        color: 0x0000ff
+      }];
 
-    let arrowDirAndColors = [{
-      dir: new THREE.Vector3(1, 0, 0),
-      color: 0xff0000
-    }, {
-      dir: new THREE.Vector3(0, 1, 0),
-      color: 0x00ff00
-    }, {
-      dir: new THREE.Vector3(0, 0, 1),
-      color: 0x0000ff
-    }];
+      arrowDirAndColors.forEach((params) => {
+        let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
+        let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
+        this.axisAGroup.add(arrowA);
+        this.axisBGroup.add(arrowB);
+      });
 
-    arrowDirAndColors.forEach((params) => {
-      let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 0.8, params.color);
-      let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
-      axisAGroup.add(arrowA);
-      axisBGroup.add(arrowB);
-    });
+      let createLabel = (group, name, x, y, z) => {
+        let label = this._makeTextSprite(name);
+        label.position.set(x, y, z);
+        group.add(label);
+        return label;
+      };
 
-    let createLabel = (group, name, x, y, z) => {
-      let label = makeTextSprite(name);
-      label.position.set(x, y, z);
-      group.add(label);
-      return label;
+      createLabel(this.axisAGroup, "X_A", 0.7, 0.05, 0.05);
+      createLabel(this.axisAGroup, "Y_A", 0.05, 0.7, 0.05);
+      createLabel(this.axisAGroup, "Z_A", 0.05, 0.05, 0.7);
+
+      createLabel(this.axisBGroup, "X_B", 1.0, 0.05, 0.05);
+      createLabel(this.axisBGroup, "Y_B", 0.05, 1.0, 0.05);
+      createLabel(this.axisBGroup, "Z_B", 0.05, 0.05, 1.0);
+
+      // aGroup.position.set(-1, 0.0, 0.0);
+      // bGroup.position.set(1, 0.0, 0.0);
+
+      this.camera.position.z = 2.;
+
+      this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
+      this.controls.addEventListener('change', () => this.renderGLScene());
+
+      this.controls.rotateSpeed = 2.0;
+      this.controls.noZoom = true;
+      this.controls.noPan = true;
+      this.controls.noRotate = false;
+      this.controls.enableDamping = false; // don't need to animate this way
+
+      let animate = function() {
+        requestAnimationFrame(animate);
+        this.renderGLScene();
+      };
+
+      // No need to animate for now.
+      // animate();
+      this.renderGLScene();
+    }
+
+    _makeTextSprite(message, parameters) {
+      if (parameters === undefined) parameters = {};
+      let fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
+      let fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 24;
+      let textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 1.0
+      };
+
+      let canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 64;
+      var context = canvas.getContext('2d');
+      context.font = "Bold " + fontsize + "px " + fontface;
+      var metrics = context.measureText(message);
+      var textWidth = metrics.width;
+
+      context.fillStyle = "rgba(" + textColor.r + ", " + textColor.g + ", " + textColor.b + ", 1.0)";
+      context.fillText(message, canvas.width / 2, canvas.height / 2);
+
+      var texture = new THREE.Texture(canvas)
+      texture.needsUpdate = true;
+
+      var spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        depthTest: false,
+        depthWrite: false
+      });
+      var sprite = new THREE.Sprite(spriteMaterial);
+      let aspectRatio = canvas.width / canvas.height;
+      sprite.scale.set(0.25 * aspectRatio, 0.25 * 1, 1);
+      return sprite;
     };
 
-    createLabel(axisAGroup, "X_A", 0.7, 0.05, 0.05);
-    createLabel(axisAGroup, "Y_A", 0.05, 0.7, 0.05);
-    createLabel(axisAGroup, "Z_A", 0.05, 0.05, 0.7);
-
-    createLabel(axisBGroup, "X_B", 1.0, 0.05, 0.05);
-    createLabel(axisBGroup, "Y_B", 0.05, 1.0, 0.05);
-    createLabel(axisBGroup, "Z_B", 0.05, 0.05, 1.0);
-
-    // aGroup.position.set(-1, 0.0, 0.0);
-    // bGroup.position.set(1, 0.0, 0.0);
-
-    glView = {};
-    glView.scene = scene;
-    glView.camera = camera;
-    glView.axisBGroup = axisBGroup;
-    glView.renderer = renderer;
-
-    camera.position.z = 2.;
-
-    controls = new THREE.TrackballControls(camera, renderer.domElement);
-    controls.addEventListener('change', renderGLScene);
-
-    controls.rotateSpeed = 2.0;
-    controls.noZoom = true;
-    controls.noPan = true;
-    controls.noRotate = false;
-    controls.enableDamping = false; // don't need to animate this way
-
-    let animate = function() {
-      requestAnimationFrame(animate);
-      renderGLScene();
-    };
-
-    // No need to animate for now.
-    // animate();
-    renderGLScene();
   };
 
   let onInit = function() {
@@ -548,7 +550,7 @@
       });
     });
 
-    createWebGLScene();
+    glView = new GLView('#webgl-view');
   }
 
   $(document).ready(onInit);
