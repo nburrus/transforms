@@ -2,162 +2,17 @@
 <html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="js/jquery.min.js"></script>
 <script src="js/three.min.js"></script>
 <script src="js/TrackballControls.js"></script>
 <script src="js/bootstrap.min.js"></script>
 
 <!-- Generated through https://www.bootstrap-live-customizer.com/ .
-     First selecting the Cosmo theme. -->
+     First selecting the Cosmo theme, and changing the grid to
+     have 24 columns instead of 12 -->
 <link rel="stylesheet" href="css/bootstrap.min.css">
-
-<style>
-  /* Remove the spinner buttons on number input fields */
-  
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  
-  input[type="number"] {
-    -moz-appearance: textfield;
-    text-align: center;
-  }
-  
-  .math {
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-    font-style: italic;
-  }
-  
-  .mathDisplay {
-    display: block;
-    text-align: center;
-    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-    font-style: italic;
-    font-weight: bold;
-    margin-bottom: 10px;
-    white-space: nowrap;
-  }
-  /* Fixed size for our pretty float */
-  
-  .form-control.prettyFloat {
-    display: inline-flex;
-    margin-right: 0em;
-    width: 6.5em;
-  }
-  
-  .page-header {
-    margin-top: 1em;
-    margin-bottom: 1em;
-  }
-  
-  .table.packed {
-    width: auto;
-    margin: 1em auto;
-  }
-  
-  .table.packed td {
-    vertical-align: middle;
-    padding: 0;
-    border: none;
-  }
-  
-  .table.packed td.pr-2 {
-    padding-right: 0.2em;
-  }
-  
-  .row {
-    background-color: #e2e9e9;
-  }
-  
-  .row.bg-1-2 {
-    background-color: #7e9a9a;
-  }
-  /* This is here to make all the columns have the same height. */
-  
-  @media only screen and (min-width: 481px) {
-    .flex-row.row {
-      display: flex;
-      flex-wrap: wrap;
-    }
-    .flex-row.row>[class*='col-'] {
-      display: flex;
-      flex-direction: column;
-    }
-    .flex-row.row:after,
-    .flex-row.row:before {
-      display: flex;
-    }
-  }
-  
-  .hide {
-    display: none;
-  }
-  
-  .col.bg-1-1 {
-    background-color: #e2e9e9;
-  }
-  
-  .col.bg-1-2 {
-    background-color: #7e9a9a;
-  }
-  
-  .col.bg-2-1 {
-    background-color: #ffebcc;
-  }
-  
-  .col.bg-2-2 {
-    background-color: #f6d8ac;
-  }
-  
-  .col.bg-2-1 {
-    background-color: #ffb84d;
-  }
-  
-  .col.bg-2-2 {
-    background-color: #db9833;
-  }
-  
-  .col.bg-3-1 {
-    background-color: #40a5f2;
-  }
-  
-  .col.bg-3-2 {
-    background-color: #2a6592;
-  }
-  
-  .col.bg-4-1 {
-    background-color: #cce9ff;
-  }
-  
-  .col.bg-4-2 {
-    background-color: #8ec3eb;
-  }
-  
-  .help-tip {
-    display: inline-block;
-    text-align: center;
-    background-color: #aaaaaa;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-    line-height: 32px;
-    font-weight: bold;
-    color: #fff;
-    cursor: default;
-  }
-  
-  .help-tip:hover {
-    background: #fff;
-    color: #aaaaaa;
-  }
-  
-  .webgl-view {
-    margin: 1em 0em;
-  }
-</style>
+<link rel="stylesheet" href="css/custom.css">
 
 <script type="application/javascript">
   var state = {};
@@ -181,7 +36,7 @@
     return v ? parseFloat(v) : 0.0;
   };
 
-  let updateRotationMatrixView = function() {
+  let updateRotationMatrixView = () => {
 
     let elmToStr = (row, col) => {
       let v = state.bFromA.elements[matrixIndex(row, col)];
@@ -197,10 +52,15 @@
       }
   };
 
-  let updateRotationMatrixVectorConversion = function() {
+  /*
+    Tries to express [X_B, Y_B, Z_B] as a permutation of
+    [X_A, Y_A, Z_A]. Only possible if the current rotation
+    only has angles that are close to 0, 90 or 180 degrees.
+  */
+  let updateRotationMatrixVectorConversion = () => {
 
     let isRotation = () => {
-      // Check if it's a rotation.
+      // Check if the 3x3 input is a rotation.
       let q = new THREE.Quaternion();
       q.setFromRotationMatrix(state.bFromA);
       let newMat = new THREE.Matrix4();
@@ -283,7 +143,7 @@
     formula.html(`<span class="mathDisplay">[X<sub>B</sub>, Y<sub>B</sub>, Z<sub>B</sub>] ${eqOrApproxEq} [${X_B}, ${Y_B}, ${Z_B}]</span>`);
   }
 
-  let updateEulerView = function() {
+  let updateEulerView = () => {
     let eulerAngles = new THREE.Euler();
     eulerAngles.setFromRotationMatrix(state.bFromA, 'ZYX');
     $('#euler-x').val(prettyFloat(rad2deg(eulerAngles.x)));
@@ -291,7 +151,7 @@
     $('#euler-z').val(prettyFloat(rad2deg(eulerAngles.z)));
   };
 
-  let updateQuaternionView = function() {
+  let updateQuaternionView = () => {
     let q = new THREE.Quaternion();
     q.setFromRotationMatrix(state.bFromA);
     $('#quaternion-x').val(prettyFloat(q.x));
@@ -300,7 +160,7 @@
     $('#quaternion-w').val(prettyFloat(q.w));
   };
 
-  let updateAngleAxisView = function() {
+  let updateAngleAxisView = () => {
     let q = new THREE.Quaternion();
     q.setFromRotationMatrix(state.bFromA);
     let angle = 2.0 * Math.acos(q.w);
@@ -322,17 +182,21 @@
     $('#angle-axis-theta').val(prettyFloat(rad2deg(angle)));
   };
 
-  let updateViewFrom = function(from) {
+  let updateViewFrom = (from) => {
     if (from != 'rotationMatrix') updateRotationMatrixView();
     if (from != 'eulerAngles') updateEulerView();
     if (from != 'quaternion') updateQuaternionView();
     if (from != 'angleAxis') updateAngleAxisView();
+
+    // Always update the permutation since it's never a user input.
     updateRotationMatrixVectorConversion();
+
+    // Update the GLView if it was already created
     if (glView)
       glView.updateGLAxes(state.bFromA);
   };
 
-  let onRotationMatrixChange = function() {
+  let onRotationMatrixChange = () => {
     for (let row = 0; row < 3; ++row) {
       for (let col = 0; col < 3; ++col) {
         let htmlId = `m${row}${col}`;
@@ -343,7 +207,7 @@
     updateViewFrom('rotationMatrix');
   };
 
-  let onEulerChange = function() {
+  let onEulerChange = () => {
     let floatRadiansOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) * Math.PI / 180.0 : 0.0;
@@ -353,7 +217,7 @@
     updateViewFrom('eulerAngles');
   };
 
-  let onQuaternionChange = function() {
+  let onQuaternionChange = () => {
     let floatOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) : 0.0;
@@ -368,7 +232,7 @@
     updateViewFrom('quaternion');
   };
 
-  let onAngleAxisChange = function() {
+  let onAngleAxisChange = () => {
     let floatOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) : 0.0;
@@ -388,7 +252,11 @@
     constructor(domIdName) {
       this.webglViewElement = $(domIdName);
       this.createScene();
+      this.createControls();
       this.createViews();
+
+      // Trigger a first rendering. The next ones will be triggered
+      // by the controls.
       this.renderGLScene();
     }
 
@@ -409,8 +277,12 @@
     }
 
     updateGLAxes(bFromA) {
+      // We need to apply aFromB when rendering the axes B.
+      // Counter intuitive but true.
       let aFromB = new THREE.Matrix4();
       aFromB.getInverse(bFromA);
+
+      // Disable auto-update to be able to assign directly a raw transform.
       this.axisBGroup.matrixAutoUpdate = false;
       this.axisBGroup.matrix = aFromB;
       this.renderGLScene();
@@ -446,18 +318,19 @@
       this.renderGLScene();
     };
 
+    setRenderSize() {
+      let windowAspectRatio = 2.0 / 1; // window will have two viewports side by side
+      let newWidth = this.webglViewElement.width();
+      this.renderer.setSize(newWidth, newWidth / windowAspectRatio);
+    }
+
     createScene() {
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xdddddd);
 
-      let windowAspectRatio = 2.0 / 1; // window will have two viewports side by side
       let cameraAspectRatio = 1.0 / 1; // each viewport will be a square
       this.camera = new THREE.PerspectiveCamera(75, cameraAspectRatio, 0.1, 1000);
-
-      this.scene.add(new THREE.AmbientLight(0x404040));
-      let light = new THREE.DirectionalLight(0xffffff);
-      light.position.set(0, 1, 0);
-      this.scene.add(light);
+      this.camera.position.z = 2.;
 
       this.renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -467,23 +340,22 @@
 
       this.webglViewElement.append(this.renderer.domElement);
 
-      let setRenderSize = () => {
-        let newWidth = this.webglViewElement.width();
-        this.renderer.setSize(newWidth, newWidth / windowAspectRatio);
-      };
-
       $(window).on('resize', () => {
-        setRenderSize();
+        this.setRenderSize();
         this.controls.handleResize();
         this.renderGLScene();
       });
 
-      setRenderSize();
+      this.setRenderSize();
 
+      // Everything related to coordinate system B
+      //  Will be show only in the left view.
       this.bGroup = new THREE.Group();
       this.bGroup.visible = false; // start hidden, each view will toggle it.
       this.scene.add(this.bGroup);
 
+      // Everything related to coordinate system A.
+      //  Will be show only in the right view.
       this.aGroup = new THREE.Group();
       this.aGroup.visible = false; // start hidden, each view will toggle it.
       this.scene.add(this.aGroup);
@@ -506,10 +378,10 @@
       }];
 
       arrowDirAndColors.forEach((params) => {
-        let arrowA = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
-        let arrowB = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
-        this.axisAGroup.add(arrowA);
-        this.axisBGroup.add(arrowB);
+        for (let axisGroup of[this.axisAGroup, this.axisBGroup]) {
+          let arrow = new THREE.ArrowHelper(params.dir, new THREE.Vector3(0, 0, 0), 1.0, params.color);
+          axisGroup.add(arrow);
+        }
       });
 
       let createLabel = (group, name, x, y, z) => {
@@ -526,15 +398,11 @@
       createLabel(this.axisBGroup, "X_B", 1.0, 0.05, 0.05);
       createLabel(this.axisBGroup, "Y_B", 0.05, 1.0, 0.05);
       createLabel(this.axisBGroup, "Z_B", 0.05, 0.05, 1.0);
+    }
 
-      // aGroup.position.set(-1, 0.0, 0.0);
-      // bGroup.position.set(1, 0.0, 0.0);
-
-      this.camera.position.z = 2.;
-
+    createControls() {
       this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
       this.controls.addEventListener('change', () => this.renderGLScene());
-
       this.controls.rotateSpeed = 2.0;
       this.controls.noZoom = true;
       this.controls.noPan = true;
@@ -544,6 +412,7 @@
 
     _makeTextSprite(message, parameters) {
       if (parameters === undefined) parameters = {};
+      let scale = parameters.hasOwnProperty("scale") ? parameters["scale"] : 0.3;
       let fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
       let fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 24;
       let textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : {
@@ -574,7 +443,7 @@
       });
       var sprite = new THREE.Sprite(spriteMaterial);
       let aspectRatio = canvas.width / canvas.height;
-      sprite.scale.set(0.3 * aspectRatio, 0.3 * 1, 1);
+      sprite.scale.set(scale * aspectRatio, scale * 1, 1);
       return sprite;
     };
 
@@ -777,6 +646,7 @@
     </div>
 
     <div class="flex-row row">
+      <!-- Occupy only half of the width in MD, full width in XS -->
       <div class="col-md-6 bg-1-1"></div>
       <div class="col-xs-24 col-md-12 bg-1-1" id="webgl-view"></div>
       <div class="col-md-6 bg-1-1"></div>

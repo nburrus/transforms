@@ -1,0 +1,153 @@
+/* Remove the spinner buttons on number input fields, and center them */  
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    text-align: center;
+}
+
+/* Fixed size for our pretty float */  
+.form-control.prettyFloat {
+    display: inline-flex;
+    margin-right: 0em;
+    width: 6.5em;
+}
+
+/* For inline math, emulating Mathjab \(\) */  
+.math {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-style: italic;
+}
+
+/* Emulate MathJax \[\] */  
+.mathDisplay {
+    display: block;
+    text-align: center;
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 10px;
+    white-space: nowrap;
+}
+
+/* WebGL view, centered with a top margin */
+
+.webgl-view {
+    margin: 1em 0em;
+}
+
+/* Help buttons */
+
+.help-tip {
+    display: inline-block;
+    text-align: center;
+    background-color: #aaaaaa;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    line-height: 32px;
+    font-weight: bold;
+    color: #fff;
+    cursor: default;
+}
+
+.help-tip:hover {
+    background: #fff;
+    color: #aaaaaa;
+}
+
+/* Bootstrap */
+
+.page-header {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.table.packed {
+    width: auto;
+    margin: 1em auto;
+}
+
+.table.packed td {
+    vertical-align: middle;
+    padding: 0;
+    border: none;
+}
+
+.table.packed td.pr-2 {
+    padding-right: 0.2em;
+}
+
+.row {
+    background-color: #e2e9e9;
+}
+
+.row.bg-1-2 {
+    background-color: #7e9a9a;
+}
+
+/* This is here to make all the columns have the same height. */
+@media only screen and (min-width: 481px) {
+    .flex-row.row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .flex-row.row>[class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+    .flex-row.row:after,
+    .flex-row.row:before {
+        display: flex;
+    }
+}
+
+.hide {
+    display: none;
+}
+
+.col.bg-1-1 {
+    background-color: #e2e9e9;
+}
+
+.col.bg-1-2 {
+    background-color: #7e9a9a;
+}
+
+.col.bg-2-1 {
+    background-color: #ffebcc;
+}
+
+.col.bg-2-2 {
+    background-color: #f6d8ac;
+}
+
+.col.bg-2-1 {
+    background-color: #ffb84d;
+}
+
+.col.bg-2-2 {
+    background-color: #db9833;
+}
+
+.col.bg-3-1 {
+    background-color: #40a5f2;
+}
+
+.col.bg-3-2 {
+    background-color: #2a6592;
+}
+
+.col.bg-4-1 {
+    background-color: #cce9ff;
+}
+
+.col.bg-4-2 {
+    background-color: #8ec3eb;
+}
