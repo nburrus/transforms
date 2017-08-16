@@ -176,6 +176,10 @@
   let deg2rad = (v) => {
     return v * Math.PI / 180.0;
   }
+  let floatOrZero = (id) => {
+    let v = document.getElementById(id).value;
+    return v ? parseFloat(v) : 0.0;
+  };
 
   let updateRotationMatrixView = function() {
 
@@ -194,6 +198,31 @@
   };
 
   let updateRotationMatrixVectorConversion = function() {
+
+    let isRotation = () => {
+      // Check if it's a rotation.
+      let q = new THREE.Quaternion();
+      q.setFromRotationMatrix(state.bFromA);
+      let newMat = new THREE.Matrix4();
+      newMat.makeRotationFromQuaternion(q);
+
+      for (let row = 0; row < 3; ++row) {
+        for (let col = 0; col < 3; ++col) {
+          let htmlId = `m${row}${col}`;
+          if (Math.abs(newMat.elements[matrixIndex(row, col)] - floatOrZero(htmlId)) > 1e-3) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    };
+
+    if (!isRotation()) {
+      $('#matrix-vector-a-from-b').html('<span class="mathDisplay">NOT A VALID ROTATION</span>');
+      return;
+    }
+
     let getRow = (rowIndex) => {
       return new THREE.Vector3(state.bFromA.elements[matrixIndex(rowIndex, 0)],
         state.bFromA.elements[matrixIndex(rowIndex, 1)],
@@ -230,7 +259,7 @@
       isApproxPermutation(row2));
 
     if (!allApprox) {
-      $('#matrix-vector-a-from-b').html("not a permutation");
+      $('#matrix-vector-a-from-b').html('<span class="mathDisplay">not a permutation</span>');
       return;
     }
 
@@ -304,11 +333,6 @@
   };
 
   let onRotationMatrixChange = function() {
-    let floatOrZero = id => {
-      let v = document.getElementById(id).value;
-      return v ? parseFloat(v) : 0.0;
-    };
-
     for (let row = 0; row < 3; ++row) {
       for (let col = 0; col < 3; ++col) {
         let htmlId = `m${row}${col}`;
