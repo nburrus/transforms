@@ -411,7 +411,8 @@
     updateGLAxes(bFromA) {
       let aFromB = new THREE.Matrix4();
       aFromB.getInverse(bFromA);
-      this.axisBGroup.setRotationFromMatrix(aFromB);
+      this.axisBGroup.matrixAutoUpdate = false;
+      this.axisBGroup.matrix = aFromB;
       this.renderGLScene();
     }
 
