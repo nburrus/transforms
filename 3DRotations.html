@@ -7,6 +7,7 @@
 <script src="js/three.min.js"></script>
 <script src="js/TrackballControls.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/clipboard-polyfill.promise.js"></script>
 
 <!-- Generated through https://www.bootstrap-live-customizer.com/ .
      First selecting the Cosmo theme, and changing the grid to
@@ -196,7 +197,11 @@
       glView.updateGLAxes(state.bFromA);
   };
 
-  let onRotationMatrixChange = () => {
+  let re_capturedNum = '(-?[\\d.e]+)';
+  let re_sep = '\\s*[,|\\s]\\s*';
+  let re_maybeSpaces = '\\s*';
+
+  let onRotationMatrixInput = () => {
     for (let row = 0; row < 3; ++row) {
       for (let col = 0; col < 3; ++col) {
         let htmlId = `m${row}${col}`;
@@ -207,7 +212,43 @@
     updateViewFrom('rotationMatrix');
   };
 
-  let onEulerChange = () => {
+  let onRotationMatrixChange = () => {
+    let x = document.getElementById("m00").value;
+    let re_3x3 = new RegExp('^' + re_maybeSpaces + (re_capturedNum + re_sep).repeat(8) + re_capturedNum + re_maybeSpaces + '$');
+    let re_4x4 = new RegExp('^' + re_maybeSpaces + (re_capturedNum + re_sep).repeat(15) + re_capturedNum + re_maybeSpaces + '$');
+    var xParsed = x.match(re_3x3, 'm');
+    var parsedNumCols = 3
+
+    if (!xParsed) {
+      xParsed = x.match(re_4x4, 'm');
+      var parsedNumCols = 4;
+    }
+
+    if (xParsed) {
+      for (let row = 0; row < 3; ++row) {
+        for (let col = 0; col < 3; ++col) {
+          let htmlId = `#m${row}${col}`;
+          $(htmlId).val(prettyFloat(xParsed[1 + row*parsedNumCols + col]))
+        }
+      }
+      onRotationMatrixInput ()
+    }
+  };
+
+  let onRotationMatrixCopy = () => {
+    var txt = ""
+    for (let row = 0; row < 3; ++row) {
+        var rowElems = []
+        for (let col = 0; col < 3; ++col) {
+          let htmlId = `#m${row}${col}`;
+          rowElems.push ($(htmlId).val())
+        }
+        txt += rowElems.join(", ") + '\n'
+    }
+    clipboard.writeText(txt)
+  }
+
+  let onEulerInput = () => {
     let floatRadiansOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) * Math.PI / 180.0 : 0.0;
@@ -217,7 +258,23 @@
     updateViewFrom('eulerAngles');
   };
 
-  let onQuaternionChange = () => {
+  let onEulerChange = () => {
+    let x = document.getElementById("euler-x").value;
+    let re = new RegExp('^' + re_maybeSpaces + (re_capturedNum + re_sep).repeat(2) + re_capturedNum + re_maybeSpaces + '$')
+    let xParsed = x.match(re)
+    if (xParsed) {
+        $('#euler-x').val(prettyFloat(xParsed[1]));
+        $('#euler-y').val(prettyFloat(xParsed[2]));
+        $('#euler-z').val(prettyFloat(xParsed[3]));
+        onEulerInput ()
+    }
+  };
+
+  let onEulerCopy = () => {    
+    clipboard.writeText([$('#euler-x').val(), $('#euler-y').val(), $('#euler-z').val()].join(', '))
+  }
+
+  let onQuaternionInput = () => {
     let floatOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) : 0.0;
@@ -232,7 +289,24 @@
     updateViewFrom('quaternion');
   };
 
-  let onAngleAxisChange = () => {
+  let onQuaternionChange = () => {
+    let x = document.getElementById("quaternion-x").value;
+    let re = new RegExp('^' + re_maybeSpaces + (re_capturedNum + re_sep).repeat(3) + re_capturedNum + re_maybeSpaces + '$')
+    let xParsed = x.match(re)
+    if (xParsed) {
+        $('#quaternion-x').val(prettyFloat(xParsed[1]));
+        $('#quaternion-y').val(prettyFloat(xParsed[2]));
+        $('#quaternion-z').val(prettyFloat(xParsed[3]));
+        $('#quaternion-w').val(prettyFloat(xParsed[4]));
+        onQuaternionInput ()
+    }
+  };
+
+  let onQuaternionCopy = () => {    
+    clipboard.writeText([$('#quaternion-x').val(), $('#quaternion-y').val(), $('#quaternion-z').val(), $('#quaternion-w').val()].join(', '))
+  }
+
+  let onAngleAxisInput = () => {
     let floatOrZero = id => {
       let v = document.getElementById(id).value;
       return v ? parseFloat(v) : 0.0;
@@ -246,6 +320,23 @@
     state.bFromA.makeRotationFromQuaternion(q);
     updateViewFrom('angleAxis');
   };
+
+  let onAngleAxisChange = () => {
+    let x = document.getElementById("angle-axis-x").value;
+    let re = new RegExp('^' + re_maybeSpaces + (re_capturedNum + re_sep).repeat(3) + re_capturedNum + re_maybeSpaces + '$')
+    let xParsed = x.match(re)
+    if (xParsed) {
+        $('#angle-axis-x').val(prettyFloat(xParsed[1]));
+        $('#angle-axis-y').val(prettyFloat(xParsed[2]));
+        $('#angle-axis-z').val(prettyFloat(xParsed[3]));
+        $('#angle-axis-theta').val(prettyFloat(xParsed[4]));
+        onAngleAxisInput ()
+    }
+  };
+
+  let onAngleAxisCopy = () => {    
+    clipboard.writeText([$('#angle-axis-x').val(), $('#angle-axis-y').val(), $('#angle-axis-z').val(), $('#angle-axis-theta').val()].join(', '))
+  }
 
   class GLView {
 
@@ -450,21 +541,25 @@
   };
 
   let onInit = function() {
+    $('#euler-x').on('change', onEulerChange);
     for (let id of['euler-x', 'euler-y', 'euler-z']) {
-      $(`#${id}`).on('input', onEulerChange);
+      $(`#${id}`).on('input', onEulerInput);
     }
 
+    $('#quaternion-x').on('change', onQuaternionChange);
     for (let id of['quaternion-x', 'quaternion-y', 'quaternion-z', 'quaternion-w']) {
-      $(`#${id}`).on('input', onQuaternionChange);
+      $(`#${id}`).on('input', onQuaternionInput);
     }
 
+    $('#angle-axis-x').on('change', onAngleAxisChange);
     for (let id of['angle-axis-x', 'angle-axis-y', 'angle-axis-z', 'angle-axis-theta']) {
-      $(`#${id}`).on('input', onAngleAxisChange);
+      $(`#${id}`).on('input', onAngleAxisInput);
     }
 
+    $(`#m00`).on('change', onRotationMatrixChange);
     for (let row = 0; row < 3; ++row)
       for (let col = 0; col < 3; ++col) {
-        $(`#m${row}${col}`).on('input', onRotationMatrixChange);
+        $(`#m${row}${col}`).on('input', onRotationMatrixInput);        
       }
 
     updateViewFrom('init');
@@ -527,16 +622,19 @@
         <table class="table packed">
           <tr>
             <td class="pr-2">X = </td>
-            <td><input type="number" class="form-control prettyFloat" id="euler-x" value="" /></td>
+            <td><input type="text" pattern="(\d|\s|,)\*" class="form-control prettyFloat" id="euler-x" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Y = </td>
-            <td><input type="number" class="form-control prettyFloat" id="euler-y" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="euler-y" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Z = </td>
-            <td><input type="number" class="form-control prettyFloat" id="euler-z" value="" /></td>
-          </tr>
+            <td><input type="text" class="form-control prettyFloat" id="euler-z" value="" /></td>
+          </tr>              
+          <tr><td/><td align='right'><img class="clipboard" onClick="onEulerCopy();"></img></td></tr>
+        </p>
+
         </table>
         <br>
       </div>
@@ -556,20 +654,21 @@
         <table class="table packed">
           <tr>
             <td class="pr-2">X = </td>
-            <td><input type="number" class="form-control prettyFloat" id="angle-axis-x" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="angle-axis-x" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Y = </td>
-            <td><input type="number" class="form-control prettyFloat" id="angle-axis-y" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="angle-axis-y" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Z = </td>
-            <td><input type="number" class="form-control prettyFloat" id="angle-axis-z" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="angle-axis-z" value="" /></td>
           </tr>
           <tr>
             <td>&Theta; = </td>
-            <td><input type="number" class="form-control prettyFloat" id="angle-axis-theta" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="angle-axis-theta" value="" /></td>
           </tr>
+          <tr><td/><td align='right'><img class="clipboard" onClick="onAngleAxisCopy();"></img></td></tr>
         </table>
         <br>
       </div>
@@ -590,20 +689,21 @@
         <table class="table packed">
           <tr>
             <td class="pr-2">X = </td>
-            <td><input type="number" class="form-control prettyFloat" id="quaternion-x" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="quaternion-x" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Y = </td>
-            <td><input type="number" class="form-control prettyFloat" id="quaternion-y" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="quaternion-y" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">Z = </td>
-            <td><input type="number" class="form-control prettyFloat" id="quaternion-z" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="quaternion-z" value="" /></td>
           </tr>
           <tr>
             <td class="pr-2">W = </td>
-            <td><input type="number" class="form-control prettyFloat" id="quaternion-w" value="" /></td>
+            <td><input type="text" class="form-control prettyFloat" id="quaternion-w" value="" /></td>
           </tr>
+          <tr><td/><td align='right'><img class="clipboard" onClick="onQuaternionCopy();"></img></td></tr>
         </table>
         <br>
       </div>
@@ -623,26 +723,31 @@
         <table class="table packed">
           <tbody id="rotation-matrix-table">
             <tr>
-              <td><input type="number" class="form-control prettyFloat" id="m00" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m01" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m02" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m00" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m01" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m02" value="" /></td>
             </tr>
             <tr>
-              <td><input type="number" class="form-control prettyFloat" id="m10" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m11" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m12" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m10" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m11" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m12" value="" /></td>
             </tr>
             <tr>
-              <td><input type="number" class="form-control prettyFloat" id="m20" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m21" value="" /></td>
-              <td><input type="number" class="form-control prettyFloat" id="m22" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m20" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m21" value="" /></td>
+              <td><input type="text" class="form-control prettyFloat" id="m22" value="" /></td>
             </tr>
+            <tr><td/><td/><td align='right'><img class="clipboard" onClick="onRotationMatrixCopy();"></img></td></tr>
           </tbody>
         </table>
         <div id="matrix-vector-a-from-b">
           $$[X,Y,Z]_B = [Y, -Z, X]_A$$
         </div>
       </div>
+    </div>
+
+    <div class="flex-row row">
+      <div class="tip"><b>Tip:</b> you can paste space or comma separated values in the first field of each formalism and it'll get parsed to fill all the fields.</div>
     </div>
 
     <div class="flex-row row">

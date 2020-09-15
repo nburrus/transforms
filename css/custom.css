@@ -1,5 +1,25 @@
 /* Remove the spinner buttons on number input fields, and center them */  
 
+.clipboard {
+    content: url(../images/clipboard.png);
+    width: 32px;
+    height: 32px;
+    opacity: 1.0;
+    padding: 5px 5px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background-color: #ffffff50;
+}
+
+.clipboard:hover {
+    background-color: #ffffffaa;
+}
+
+.clipboard:active {
+    opacity: 1.0;
+    background-color: #ffffffff;
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -7,6 +27,11 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 input[type="number"] {
+    -moz-appearance: textfield;
+    text-align: center;
+}
+
+input[type="text"] {
     -moz-appearance: textfield;
     text-align: center;
 }
@@ -66,6 +91,12 @@ input[type="number"] {
 
 p.vcenter {
     margin: 0.5em auto;
+}
+
+.tip {
+    flex-grow: 100;
+    text-align: center;
+    font-style: italic;
 }
 
 .page-header {
