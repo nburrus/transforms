@@ -614,9 +614,11 @@
         <div id="euler-popover-content" class="hide">
           <p>
             Here they are defined in the Z-Y-X order,
-            <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>, Intrinsics.
-            <p><span class="mathDisplay">BfromA = R(Z) * R(Y) * R(X)</span></p> This means that a point gets transformed by first applying the rotation around X, then around the new Y, then around the new Z.
-            <br><br> If you are trying to simulate the transform with your fingers, don't forget that applying these angles in sequence will make your finger-axes go from B to A, not from A to B!
+            <a href="https://en.wikipedia.org/wiki/Euler_angles#Tait.E2.80.93Bryan_angles">Tait-Bryan</a>, Intrinsics. Note that this is the same as x-y-z, Tait-Bryan, Extrinsics.
+            <p><span class="mathDisplay">BfromA = R(Z) * R(Y) * R(X)</span></p> This corresponds to the rotation of an object A in a coordinate system B. Applying the extrinsics
+            sequence this means that a point gets transformed by first applying the rotation around <span class="math">X<sub>B</sub></span>, then around 
+            <span class="math">Y<sub>B</sub></span>, then around <span class="math">Z<sub>B</sub></span>.
+            <br><br> If you are trying to simulate the transform with your fingers, applying these angles in sequence will make your finger-axes go from B to A, not from A to B.
           </p>
         </div>
         <table class="table packed">
